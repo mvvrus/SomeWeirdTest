@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using StringPart = System.String;
 
 namespace Test
 {
@@ -23,17 +22,51 @@ namespace Test
 			AllowedDowPart.CreateDateTimePart
 		};
 
-		class SecondLevelParser
+		static readonly SecondLevelParser[][] SecondLevelParsers = new SecondLevelParser[][] {
+			new SecondLevelParser[] {new DatePartParser(), new DayOfWeekPartParser(), new TimePartParser() }, //yyyy.MM.dd w HH:mm:ss.fff, yyyy.MM.dd w HH:mm:ss
+			new SecondLevelParser[] {new DatePartParser(), new TimePartParser() },                            //yyyy.MM.dd HH:mm:ss.fff, yyyy.MM.dd HH:mm:ss 
+			new SecondLevelParser[] {new DatePartParser() },                                                  //HH:mm:ss.fff., HH:mm:ss
+		};
+
+		const int MAX_SCHEDULE_PARTS = 3;
+		static StringPartArray _mainPartsSpace = new StringPartArray(new StringPart[MAX_SCHEDULE_PARTS]);
+		static StringPartArray SplitInitialString (String scheduleString)
         {
-			//TODO
+			return scheduleString.Split(' ', ref _mainPartsSpace);
         }
-		static readonly SecondLevelParser[] SecondLevelParsers = new SecondLevelParser[] {
-			//TODO Fill the list
-			};
-		static void MainParser(String scheduleString, ref int[][] AllowedLists)
+		static void MainParser(String scheduleString, ref bool[][] AllowedLists)
         {
-			foreach (SecondLevelParser second_level_parser in SecondLevelParsers) ;
-			//TODO
+			lock(_mainPartsSpace)
+            {
+				StringPartArray scheduleParts = SplitInitialString(scheduleString);
+				bool parse_failed = scheduleParts==null;
+				if (!parse_failed)
+				{
+					bool recognized = false;
+					SecondLevelParser[] parser_list = null;
+					foreach (SecondLevelParser[] second_level_parser_list in SecondLevelParsers)
+					{
+						recognized = false;
+						if (second_level_parser_list.Length == scheduleParts.Length)
+						{
+							for (int i = 0; i < scheduleParts.Length; i++)
+								recognized = recognized || second_level_parser_list[i].Recognize(scheduleParts[i]);
+						}
+						if (recognized)
+						{
+							parser_list = second_level_parser_list;
+							break;
+						}
+					}
+					if (recognized)
+					{
+						for (int i = 0; i < parser_list.Length; i++)
+							parse_failed = parse_failed || !parser_list[i].Parse(scheduleParts[i], ref AllowedLists);
+					}
+					else parse_failed = true;
+				}
+				if (parse_failed) throw new InvalidOperationException("Parsing the scheduling string'" + scheduleString + "' failed");
+			}
 		}
 
 		readonly AllowedDateTimePart[] ScheduleParts = new AllowedDateTimePart[PartConsts.NUM_PARTS];
@@ -43,7 +76,7 @@ namespace Test
 
 		public Schedule(string scheduleString)
 		{
-			int[][] AllowedLists = new int[PartConsts.NUM_PARTS][];
+			bool[][] AllowedLists = new bool[PartConsts.NUM_PARTS][];
 			if (scheduleString != null)
 				MainParser(scheduleString, ref AllowedLists);
 			for (int i = 0; i < PartConsts.NUM_PARTS; i++)
@@ -106,10 +139,50 @@ namespace Test
 			int part_number;
 			bool step_made = false;
 			int[] parts_to_adjust = AcquireAdjustmentStack();
-			try { 
+			try {
+				part_number = PartConsts.NUM_PARTS - 1;
+				bool need_adjustment = false;
+				bool still_valid = true;
+				bool no_wrap = true;
+				do
+				{ 
+					do {
+						//Process intiallly invalid values
+						ScheduleParts[part_number].SetContext(ValueParts);
+						if (!ScheduleParts[part_number].IsCheckOnly) //Check-only steps are always skipped here
+						{
+							if (still_valid || !no_wrap) //Need make validation and/or step
+							{
+								if (still_valid) //Should continue validation from upper parts if it's not the lowest part (for which a step is required)
+									still_valid = part_number>0 || ScheduleParts[part_number].ValueIsAllowed(ValueParts[part_number]);
+								if (!still_valid) //Validation of this or upper parts failed;
+									ValueParts[part_number] =
+										ScheduleParts[part_number].StepValue(ValueParts[part_number], ToNext, out no_wrap, ref need_adjustment);
+							}
+							else //A step to next/prev value somewhere in the upper part processing occured.
+								ValueParts[part_number] = ScheduleParts[part_number].Wrap(ToNext, out no_wrap);
+						}
+						if (no_wrap) part_number--; else part_number++;
+					} while (part_number >= 0 && part_number < PartConsts.NUM_PARTS);
+					step_made = true;
+					if (part_number<0)//All parts where the step is possible (i.e. non-checkonly) are valid here after the step made
+						for (part_number = 0; part_number < PartConsts.NUM_PARTS; part_number++) {//Validate check-only parts
+						   if(ScheduleParts[part_number].IsCheckOnly)
+                           {
+								if (!ScheduleParts[part_number].ValueIsAllowed(ValueParts[part_number]))
+                                {
+									//Validity of this part was violated (it's possible for composite part, like DayOfWeek, checks).
+									//Restart making the step from the first part, from wich this composite part is dependent
+									part_number = ScheduleParts[part_number].MinimalDependentPart; //Reset the current part number
+									step_made = false;
+								}
+							}
+						}
+				} while (!step_made);
+
 				do
 				{
-					bool need_adjustment=false;
+					need_adjustment=false;
 					int adjust_from = -1;
 					part_number = 0;
 					do
@@ -170,7 +243,7 @@ namespace Test
 			finally { 
 				ReleaseAdjustmentStack(parts_to_adjust); 
 			}
-			return true;
+			return step_made;
         }
 
 		public DateTime NearestEvent(DateTime t1)

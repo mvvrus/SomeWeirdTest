@@ -45,9 +45,18 @@
     <Compile Include="AllowedDateTimePart.cs" />
     <Compile Include="AllowedDayPart.cs" />
     <Compile Include="AllowedDowPart.cs" />
+    <Compile Include="AnyParser.cs" />
+    <Compile Include="DatePartParser.cs" />
+    <Compile Include="DayOfWeekPartParser.cs" />
+    <Compile Include="ListElementParser.cs" />
+    <Compile Include="ListParser.cs" />
     <Compile Include="PartConsts.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Schedule.cs" />
+    <Compile Include="SecondLevelParser.cs" />
+    <Compile Include="StringPart.cs" />
+    <Compile Include="TimePartParser.cs" />
+    <Compile Include="TwoDelimParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Schedule.cs.txt" />

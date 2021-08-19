@@ -8,50 +8,52 @@ namespace Test
 
         readonly int _minAllowed, _maxAllowed;
         protected readonly bool[] _allowedValues=null; //If the instance allows any value, the allowed list reference is left null
+        protected bool JustWrapped { get; private set; }
+        protected int FirstAllowedValue { get; private set; }
+        protected int LastAllowedValue { get; private set; }
         public bool AllowAll { get { return _allowedValues == null; } }
 
-        protected AllowedDateTimePart(int MinAllowed,int MaxAllowed,int[] AllowedList)
-        {
-            _minAllowed = MinAllowed;
-            _maxAllowed = MaxAllowed;
-            if (AllowedList!=null) {
-                //This instance allows only specific values of its DateTime part, en
-                _allowedValues = new bool[MaxAllowed - MinAllowed];
-                foreach (int i in AllowedList) _allowedValues[i] = true;
-            }
-            //Otherwise This instance allows any value of of its DateTime part, and the _allowedList array reference is left null
-        }
-        protected static int? FindNextPrevValue(int StartValue, int StopValue, Boolean[] AllowedValues, int BaseValue)
+        static int? FindNextPrevValue(int StartValue, int StopValue, Boolean[] AllowedValues, int BaseValue)
         {
             int step = StopValue >= StartValue ? 1 : -1;
             int curvalue = StartValue;
             do
             {
                 curvalue += step;
-                if (curvalue != StopValue && (AllowedValues==null || AllowedValues[curvalue-BaseValue]))
-                    return  curvalue;
+                if (curvalue != StopValue && (AllowedValues == null || AllowedValues[curvalue - BaseValue]))
+                    return curvalue;
             }
             while (curvalue != StopValue);
-            return null ;
+            return null;
         }
 
-        protected int FindFirstAllowedValue()
+        protected AllowedDateTimePart(int MinAllowed,int MaxAllowed,bool[] AllowedList)
         {
-            int? wrap_to = FindNextPrevValue(_minAllowed - 1, _maxAllowed + 1, _allowedValues, _minAllowed);
-            if (!wrap_to.HasValue) throw new Exception("Empty list of valid values for the part");
-            return wrap_to.Value;
+            _minAllowed = MinAllowed;
+            _maxAllowed = MaxAllowed;
+            _allowedValues = AllowedList;
+            if (_allowedValues != null)
+            {
+                int? temp;
+                temp = FindNextPrevValue(_minAllowed - 1, _maxAllowed + 1, _allowedValues, _minAllowed);
+                if (!temp.HasValue) throw new Exception("Empty list of valid values for the part");
+                FirstAllowedValue=temp.Value;
+                temp = FindNextPrevValue(_maxAllowed + 1, _minAllowed - 1, _allowedValues, _minAllowed);
+                if (!temp.HasValue) throw new Exception("Empty list of valid values for the part");
+                LastAllowedValue=temp.Value;
+            }
+            else
+            {
+                FirstAllowedValue = _minAllowed;
+                LastAllowedValue = _maxAllowed;
+            }
         }
-
-        protected int FindLastAllowedValue()
+        protected int? FindNextPrevValue(int StartValue, int StopValue)
         {
-            int? wrap_to = FindNextPrevValue(_minAllowed - 1, _maxAllowed + 1, _allowedValues, _minAllowed);
-            if (!wrap_to.HasValue) throw new Exception("Empty list of valid values for the part");
-            return wrap_to.Value;
+            return FindNextPrevValue(StartValue, StopValue, _allowedValues, _minAllowed);
         }
 
-        //protected virtual int GetMaxAllowed() {return _maxAllowed; }
-
-        public static AllowedDateTimePart CreateDateTimePart(int MinAllowed, int MaxAllowed, int[] AllowedList)
+        public static AllowedDateTimePart CreateDateTimePart(int MinAllowed, int MaxAllowed, bool[] AllowedList)
         {
             return new AllowedDateTimePart(MinAllowed, MaxAllowed, AllowedList);
         }
@@ -70,7 +72,7 @@ namespace Test
             if (result.HasValue) return result.Value; //Allowed value found in the rest of the range.
             //No allowed value found in the rest of the range. Wrap shoud occur
             //Search the first(or last) allowed value in the whole range of values
-            return ToNext ? FindFirstAllowedValue() : FindLastAllowedValue();
+            return ToNext ? FirstAllowedValue :LastAllowedValue;
         }
 
         public virtual int Adjust(int Value, bool ToNext, out bool adjusted)
@@ -84,10 +86,16 @@ namespace Test
             return false;
         }
 
+        public virtual int Wrap(bool ToNext, out bool NoWrapMore)
+        {
+            NoWrapMore = true; //The allowed value always exists (it was checked during schedule string parsing)
+            return ToNext ? FirstAllowedValue: LastAllowedValue;
+        }
+
         public virtual bool IsCheckOnly { get { return false; } }
         public virtual int MinimalDependentPart { get { return 0; } }
     }
 
-    public delegate AllowedDateTimePart AllowedDateTimePartCreator(int[] AllowedList);
+    public delegate AllowedDateTimePart AllowedDateTimePartCreator(bool[] AllowedList);
 
 }

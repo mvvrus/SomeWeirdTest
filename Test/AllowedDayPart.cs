@@ -12,12 +12,12 @@ namespace Test
         private int _current_month=1;
         private bool _leap_year;
         private int _day_after_step = 0;
-        AllowedDayPart(int[] AllowedList) : base(PartConsts.FIRST_DAY_IN_MONTH, PartConsts.LAST_DAY_IN_MONTH, AllowedList)
+        AllowedDayPart(bool[] AllowedList) : base(PartConsts.FIRST_DAY_IN_MONTH, PartConsts.LAST_DAY_IN_MONTH, AllowedList)
         {
             ;
         }
 
-        public static AllowedDateTimePart CreateDateTimePart(int[] AllowedList)
+        public static AllowedDateTimePart CreateDateTimePart(bool[] AllowedList)
         {
             return new AllowedDayPart(AllowedList);
         }
@@ -60,7 +60,7 @@ namespace Test
                         {
                             //General case: this month is two short or, may be, the last day was already allowed explicitly 
                             // So wrap around the range to the first valid value and force making step for a subsequent(month) part
-                            result = FindFirstAllowedValue();
+                            result = FirstAllowedValue;
                             NoWrap = false;
                         }
                     }
@@ -92,7 +92,7 @@ namespace Test
             else
             {
                 //Adjust after stepping backward: try to find the last allowed day in the month
-                int? adjustment_result = FindNextPrevValue(last_day_in_this_month+1, PartConsts.FIRST_DAY_IN_MONTH - 1, _allowedValues, PartConsts.FIRST_DAY_IN_MONTH);
+                int? adjustment_result = FindNextPrevValue(last_day_in_this_month+1, PartConsts.FIRST_DAY_IN_MONTH - 1);
                 if (adjustment_result.HasValue) return adjustment_result.Value;
                 //Come here if no day in the current month is allowed e.g. in June if only 31-st days allowed
                 adjusted = false;
@@ -106,5 +106,29 @@ namespace Test
             return _day_after_step > 0;
         }
 
+        public override int Wrap(bool ToNext, out bool NoWrapMore)
+        {
+            int result = base.Wrap(ToNext,out NoWrapMore);
+            //The allowed day in this month may not exist, if all allowed days fall beyond the end of the month
+            int last_day_in_this_month = GetMaxAllowed();
+            if (result> last_day_in_this_month)
+            {
+                //The allowed day found is beyond the end of the month
+                if (result == PartConsts.LAST_DAY_IN_MONTH)  //The last day in month is implicitly allowed and is wrapped to.
+                    result = last_day_in_this_month;  // Return it
+                else
+                    //The day found is not the implicit "last day of the month"
+                    if (ToNext)
+                        //Wrapping forward beyond the number of days in this month occured
+                        NoWrapMore = false; //No days in this month are allowed. Try next/previos month
+                    else {
+                        //Wrapping backward occured. Try to find the last allowed day in this month (if any)
+                        int? wrap_to = FindNextPrevValue(last_day_in_this_month + 1, PartConsts.FIRST_DAY_IN_MONTH - 1);
+                        NoWrapMore = wrap_to.HasValue; 
+                        if (wrap_to.HasValue) result = wrap_to.Value; //That day is found. Return it.
+                    }
+            }
+            return result;
+        }
     }
 }

@@ -3,12 +3,12 @@
     static internal class PartConsts{
         internal const int FIRST_MSEC = 0;
         internal const int LAST_MSEC = 999;
-        internal const int FIRST_SEC = 1;
-        internal const int LAST_SEC = 60;
-        internal const int FIRST_MIN = 1;
-        internal const int LAST_MIN = 60;
-        internal const int FIRST_HOUR = 1;
-        internal const int LAST_HOUR = 24;
+        internal const int FIRST_SEC = 0;
+        internal const int LAST_SEC = 59;
+        internal const int FIRST_MIN = 0;
+        internal const int LAST_MIN = 59;
+        internal const int FIRST_HOUR = 0;
+        internal const int LAST_HOUR = 23;
         internal const int MONTHS_IN_YEAR = 12;
         internal const int FIRST_DAY_IN_MONTH = 1;
         internal const int LAST_DAY_IN_MONTH = 32;

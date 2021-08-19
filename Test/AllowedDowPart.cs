@@ -11,7 +11,7 @@ namespace Test
 
         int _curDay, _curMonth, _curYear;
         int _curDow;
-        AllowedDowPart(int[] AllowedList):base(PartConsts.FIRST_DOW, PartConsts.LAST_DOW,AllowedList)
+        AllowedDowPart(bool[] AllowedList):base(PartConsts.FIRST_DOW, PartConsts.LAST_DOW,AllowedList)
         {
             DateTime today = DateTime.Today;
             _curDay = today.Day;
@@ -22,7 +22,7 @@ namespace Test
 
         public override bool IsCheckOnly { get { return true; } }
 
-        public static AllowedDateTimePart CreateDateTimePart(int[] AllowedList)
+        public static AllowedDateTimePart CreateDateTimePart(bool[] AllowedList)
         {
             return new AllowedDowPart(AllowedList);
         }
@@ -80,6 +80,11 @@ namespace Test
         }
 
         public override int StepValue(int Value, bool ToNext, out bool NoWrap, ref bool NeedAdjustment)
+        {
+            throw new NotImplementedException(); //Should not ever be called
+        }
+
+        public override int Wrap(bool ToNext, out bool NoWrapMore)
         {
             throw new NotImplementedException(); //Should not ever be called
         }
