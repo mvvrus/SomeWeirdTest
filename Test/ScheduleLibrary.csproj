@@ -50,10 +50,13 @@
     <Compile Include="DayOfWeekPartParser.cs" />
     <Compile Include="ListElementParser.cs" />
     <Compile Include="ListParser.cs" />
+    <Compile Include="NumberParser.cs" />
     <Compile Include="PartConsts.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RangeParser.cs" />
     <Compile Include="Schedule.cs" />
     <Compile Include="SecondLevelParser.cs" />
+    <Compile Include="StepwiseParser.cs" />
     <Compile Include="StringPart.cs" />
     <Compile Include="TimePartParser.cs" />
     <Compile Include="TwoDelimParser.cs" />

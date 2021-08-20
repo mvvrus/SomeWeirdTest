@@ -30,7 +30,7 @@ namespace Test
         public String BaseString { get { return _baseString; } }
         public int Start { get { return _start; } }
         public int End { get { return _end; } }
-        public char this[int Index] 
+        public Char this[int Index] 
         { get { if (_baseString != null) return _baseString[Index]; throw new IndexOutOfRangeException(); } }
         public bool Truncate(int NewLength)
         {

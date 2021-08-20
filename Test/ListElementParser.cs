@@ -8,8 +8,8 @@ namespace Test
 {
     abstract class ListElementParser
     {
-        public abstract bool Recognize(in StringPart Part);
-        public abstract bool Parse(in StringPart Part, ref bool[] AllowedValues, int MinValue, int MaxValue);
+        public abstract bool Recognize(StringPart Part);
+        public abstract bool Parse(StringPart Part, ref bool[] AllowedValues, int MinValue, int MaxValue);
 
     }
 }

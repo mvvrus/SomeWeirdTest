@@ -11,8 +11,15 @@ namespace Test
         const char DELIM = ',';
         readonly int _start;
         readonly int _end;
-        static readonly ListElementParser[] _listElementParsers=new ListElementParser[] { };
-        static readonly StringPart _element_part = new StringPart(null);
+        static readonly ListElementParser[] _listElementParsers=new ListElementParser[] //Parsers for the list elements, in the order ow lowering priority
+        {
+            StepwiseParser.STEPWISE_PARSER,
+            RangeParser.RANGE_PARSER,
+            AnyParser.ANY_PARSER,
+            NumberParser.NUMBER_PARSER
+        };
+
+        static readonly StringPart _work_part = new StringPart(null);
 
         public ListParser(int Start, int End)
         {
@@ -20,20 +27,20 @@ namespace Test
             _end = End;
         }
         
-        static StringPart AcquireWorkElement()
+        static StringPart AcquireWorkPart()
         {
-            return _element_part;
+            return _work_part;
         }
 
-        static void ReleaseWorkElement(StringPart _1){}
+        static void ReleaseWorkPart(StringPart _1){}
         public bool Parse(in StringPart Part, ref bool[] AllowedList)
         {
             int list_delim_pos=-1;
-            StringPart work_part = AcquireWorkElement();
+            StringPart work_part = AcquireWorkPart();
             int array_length = _end - _start + 1;
             AllowedList = new bool[array_length];
-            bool[] saved_list = AllowedList;
-            bool[] element_list=AllowedList;
+            bool[] saved_list = AllowedList;  //Permanent (for the method duration) anchor to avoid AllowedList be garbage collected
+            bool[] element_list=AllowedList;  //Work reference
             try {
                 do
                 {
@@ -55,7 +62,7 @@ namespace Test
                 } while (list_delim_pos >= 0);
             } finally
             {
-                ReleaseWorkElement(work_part);
+                ReleaseWorkPart(work_part);
             }
             bool result = AllowedList!=null;
             for (int i = 0; !result && i < array_length; i++)

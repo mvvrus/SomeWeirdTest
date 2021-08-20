@@ -7,11 +7,10 @@ namespace Test
     {
 
         readonly int _minAllowed, _maxAllowed;
-        protected readonly bool[] _allowedValues=null; //If the instance allows any value, the allowed list reference is left null
-        protected bool JustWrapped { get; private set; }
+        readonly bool[] _allowedValues=null; //If the instance allows any value, the allowed list reference is left null
         protected int FirstAllowedValue { get; private set; }
         protected int LastAllowedValue { get; private set; }
-        public bool AllowAll { get { return _allowedValues == null; } }
+        public bool AllAllowed { get { return _allowedValues == null; } }
 
         static int? FindNextPrevValue(int StartValue, int StopValue, Boolean[] AllowedValues, int BaseValue)
         {
@@ -57,14 +56,13 @@ namespace Test
         {
             return new AllowedDateTimePart(MinAllowed, MaxAllowed, AllowedList);
         }
-        public virtual bool ValueIsAllowed(int Value) {
-            if (AllowAll) return true;
+        public virtual bool ValueIsAllowed(int Value, int[] DateContext) {
+            if (AllAllowed) return true;
             return _allowedValues[Value-_minAllowed]; 
         }
 
-        public virtual void SetContext(int[] DateContext) { }
 
-        public virtual int StepValue(int Value, bool ToNext, out bool NoWrap, ref bool NeedAdjustment)
+        public virtual int StepValue(int Value, bool ToNext, out bool NoWrap, int[] DateContext)
         {
             //Search for the next allowed value forward/back
             int? result = FindNextPrevValue(Value, ToNext?_maxAllowed + 1: _minAllowed - 1, _allowedValues, _minAllowed);
@@ -75,18 +73,7 @@ namespace Test
             return ToNext ? FirstAllowedValue :LastAllowedValue;
         }
 
-        public virtual int Adjust(int Value, bool ToNext, out bool adjusted)
-        {
-            adjusted = true;
-            return Value;
-        }
-
-        public virtual bool ShouldReadjust(ref int Value, bool ToNext)
-        {
-            return false;
-        }
-
-        public virtual int Wrap(bool ToNext, out bool NoWrapMore)
+        public virtual int Wrap(bool ToNext, out bool NoWrapMore, int[] DateContext)
         {
             NoWrapMore = true; //The allowed value always exists (it was checked during schedule string parsing)
             return ToNext ? FirstAllowedValue: LastAllowedValue;
