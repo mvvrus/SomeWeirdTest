@@ -46,7 +46,7 @@ namespace Test
                 {
                     int old_pos = list_delim_pos + 1;
                     list_delim_pos = Part.IndexOf(DELIM, old_pos);
-                    StringPart element_part = Part.SubPart(old_pos, (list_delim_pos < 0 ? Part.Length : list_delim_pos), ref work_part);
+                    StringPart element_part = Part.SubPart(old_pos, (list_delim_pos < 0 ? Part.Length : list_delim_pos), work_part);
                     ListElementParser element_parser = _listElementParsers.FirstOrDefault(curparser => curparser.Recognize(element_part));
                     if (element_parser == null) return false;
                     if (element_parser.Parse(element_part, ref element_list, _start, _end))

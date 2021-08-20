@@ -29,10 +29,10 @@ namespace Test
 		};
 
 		const int MAX_SCHEDULE_PARTS = 3;
-		static StringPartArray _mainPartsSpace = new StringPartArray(new StringPart[MAX_SCHEDULE_PARTS]);
+		static readonly StringPartArray _mainPartsSpace = new StringPartArray(MAX_SCHEDULE_PARTS);
 		static StringPartArray SplitInitialString (String scheduleString)
         {
-			return scheduleString.Split(' ', ref _mainPartsSpace);
+			return scheduleString.Split(' ', _mainPartsSpace);
         }
 		static void MainParser(String scheduleString, ref bool[][] AllowedLists)
         {

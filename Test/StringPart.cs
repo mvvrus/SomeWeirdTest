@@ -57,7 +57,7 @@ namespace Test
         public int IndexOf(char Value, int StartPos=0)
         {
             int result;
-            if (StartPos < 0 || StartPos >= Length) throw new ArgumentOutOfRangeException();
+            if (StartPos < 0 || StartPos > Length) throw new ArgumentOutOfRangeException();
             if (_baseString != null)
             {
                 result = _baseString.IndexOf(Value, StartPos + _start, Length - StartPos);
@@ -67,61 +67,53 @@ namespace Test
             return result;
         }
 
-        public StringPart SubPart(int RelativeStart, int RelativeEnd, ref StringPart WorkSpace)
+        public StringPart SubPart(int RelativeStart, int RelativeEnd, StringPart WorkSpace)
         {
             WorkSpace._baseString = _baseString;
+            if (RelativeStart < 0 || RelativeEnd < 0 || RelativeStart > Length || RelativeEnd > Length || RelativeEnd < RelativeStart)
+                throw new ArgumentOutOfRangeException();
             WorkSpace._start = RelativeStart + _start;
             WorkSpace._end = RelativeEnd + _start;
             return WorkSpace;
-
         }
-       
+
+        public override string ToString()
+        {
+            return _baseString==null?String.Empty:_baseString.Substring(Start,Length);
+        }
+
 
     }
 
-    class EmptyEnumerator<T> : IEnumerator<T>
-    {
-        public T Current {get{ return default; }}
-        object IEnumerator.Current {get {return default;}}
-        public void Dispose() { }
-        public bool MoveNext()  {return false;}
-        public void Reset() {}
-    }
-    public class StringPartArray: IEnumerable<StringPart>
+    public class StringPartArray
     {
         readonly StringPart[] _baseArray;
         int _length;
         readonly int _capacity;
         public int Length { get { return _length; } }
-        public StringPartArray() { }
-        public StringPartArray(StringPart[] BaseArray)
+        public int Capacity { get { return _capacity; } }
+        public StringPartArray(int Capacity)
         {
-            _baseArray = BaseArray;
-            _length = _baseArray != null ? _baseArray.Length : 0;
-            _capacity = _length;
-        }
-        public StringPartArray(int Length)
-        {
-            if (Length < 0) throw new InvalidOperationException("StringPartArray length cannot be negative");
-            _length = Length;
-            _capacity = Length;
-            _baseArray = Length > 0 ? new StringPart[Length] : null;
+            if (Capacity < 0) throw new InvalidOperationException("StringPartArray length cannot be negative");
+            _length = 0;
+            _capacity = Capacity;
+            _baseArray = new StringPart[Capacity];
+            for (int i = 0; i < _capacity; i++) _baseArray[i] = new StringPart(null);
         }
 
         public StringPart this[int Index] {
             get { if (Index >= _length) throw new IndexOutOfRangeException(); return _baseArray[Index]; }
-            set { if (Index >= _length) throw new IndexOutOfRangeException(); _baseArray[Index] = value; }
         }
         internal void SetLength(int NewLength)
         {
             if (NewLength < 0 || NewLength > _capacity)
                 throw new InvalidOperationException("StringPartArray length cannot be negative or exceeds capacity");
-            int to_clear = _length - NewLength-1;
+            int to_clear = _length - NewLength;
             _length = NewLength;
-            for (int i = 0; i < to_clear; i++) _baseArray[NewLength + i].Clear();
+            for (int i = 0; i < to_clear; i++) _baseArray[_length + i].Clear();
         }
 
-        internal bool Add(String BaseString, int Start, int End)
+        public bool Add(String BaseString, int Start, int End)
         {
             if (_length >= _capacity) return false;
             _baseArray[_length]._baseString = BaseString;
@@ -130,21 +122,11 @@ namespace Test
             _length++;
             return true;
         }
-
-        public IEnumerator<StringPart> GetEnumerator()
-        {
-            return _baseArray!=null?((IEnumerable<StringPart>)_baseArray).GetEnumerator(): new EmptyEnumerator<StringPart>();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return _baseArray != null ? _baseArray.GetEnumerator() : new EmptyEnumerator<StringPart>();
-        }
     }
 
     public static class StringPartExtension
     {
-        public static StringPartArray Split(this string SourceString, char Delimiter, ref StringPartArray ResultSpace)
+        public static StringPartArray Split(this string SourceString, char Delimiter, StringPartArray ResultSpace)
         {
             return new StringPart(SourceString).Split(Delimiter, ref ResultSpace);
         }
