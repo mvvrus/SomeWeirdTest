@@ -11,7 +11,7 @@ namespace Test
 
         readonly int _startDay, _startMonth, _startYear;
         readonly int _startDow;
-        AllowedDowPart(bool[] AllowedList):base(PartConsts.FIRST_DOW, PartConsts.LAST_DOW,AllowedList)
+        AllowedDowPart(bool[] AllowedList, int PartNumber):base(PartConsts.FIRST_DOW, PartConsts.LAST_DOW,AllowedList, PartNumber)
         {
             DateTime today = DateTime.Today;
             _startDay = today.Day;
@@ -24,17 +24,17 @@ namespace Test
 
         public static AllowedDateTimePart CreateDateTimePart(bool[] AllowedList)
         {
-            return new AllowedDowPart(AllowedList);
+            return new AllowedDowPart(AllowedList, PartConsts.DOW);
         }
 
-        int NumFebs29InRange(int[] DateContext, bool CountBack)
+        int NumFebs29InRange(int[] ValueParts, bool CountBack)
         {
             int first_year, last_year; //Range of years to search for leap ones
 
             if (CountBack)
             {
-                first_year = DateContext[PartConsts.YEARS];
-                if (DateContext[PartConsts.MONTHS] > PartConsts.FEBRUARY_MONTH) first_year++;
+                first_year = ValueParts[PartConsts.YEARS];
+                if (ValueParts[PartConsts.MONTHS] > PartConsts.FEBRUARY_MONTH) first_year++;
                 last_year = _startYear;
                 if (_startMonth <= PartConsts.FEBRUARY_MONTH) last_year--;
             }
@@ -42,8 +42,8 @@ namespace Test
             {
                 first_year = _startYear;
                 if (_startYear > PartConsts.FEBRUARY_MONTH) first_year++;
-                last_year = DateContext[PartConsts.YEARS];
-                if (DateContext[PartConsts.MONTHS] <= PartConsts.FEBRUARY_MONTH) last_year--;
+                last_year = ValueParts[PartConsts.YEARS];
+                if (ValueParts[PartConsts.MONTHS] <= PartConsts.FEBRUARY_MONTH) last_year--;
             }
             int result = 0;
             for(int year=first_year;year<last_year;year++)
@@ -51,21 +51,21 @@ namespace Test
             return result;
         }
 
-        public override bool ValueIsAllowed(int _1, int[] DateContext)
+        public override bool ValueIsAllowed(int _1, int[] ValueParts)
         {
-            //Has side effect! Computes and sets DateContext[DOW] value.
-            bool count_back = _startYear > DateContext[PartConsts.YEARS] ||
-                (_startYear == DateContext[PartConsts.YEARS] && (_startMonth > DateContext[PartConsts.MONTHS])
-                || _startMonth == DateContext[PartConsts.MONTHS] && _startDay > DateContext[PartConsts.DAYS]);
-            int feb29_count = NumFebs29InRange (DateContext, count_back);
+            //Has side effect! Computes and sets ValueParts[DOW] value.
+            bool count_back = _startYear > ValueParts[PartConsts.YEARS] ||
+                (_startYear == ValueParts[PartConsts.YEARS] && (_startMonth > ValueParts[PartConsts.MONTHS])
+                || _startMonth == ValueParts[PartConsts.MONTHS] && _startDay > ValueParts[PartConsts.DAYS]);
+            int feb29_count = NumFebs29InRange (ValueParts, count_back);
 
             int days_passed;
-            days_passed = (DateContext[PartConsts.DAYS] - _startDay)+ DaysInMonthsPassedNonLeap(_startMonth, DateContext[PartConsts.MONTHS])
-                +(DateContext[PartConsts.YEARS]-_startYear)* PartConsts.DAYS_IN_NONLEAP_YEAR +(count_back?-feb29_count:feb29_count);
+            days_passed = (ValueParts[PartConsts.DAYS] - _startDay)+ DaysInMonthsPassedNonLeap(_startMonth, ValueParts[PartConsts.MONTHS])
+                +(ValueParts[PartConsts.YEARS]-_startYear)* PartConsts.DAYS_IN_NONLEAP_YEAR +(count_back?-feb29_count:feb29_count);
             int dow = (_startDow + days_passed) % PartConsts.DAYS_IN_WEEK;
             if (dow < 0) dow = (PartConsts.DAYS_IN_WEEK + _startDow) % PartConsts.DAYS_IN_WEEK;
-            DateContext[PartConsts.DOW] = dow;
-            return base.ValueIsAllowed(dow, DateContext);
+            ValueParts[PartNumber] = dow;
+            return base.ValueIsAllowed(dow, ValueParts);
         }
 
         private int DaysInMonthsPassedNonLeap(int CurMonth, int MonthToCome)
@@ -77,12 +77,12 @@ namespace Test
             return result;
         }
 
-        public override int StepValue(int Value, bool ToNext, out bool NoWrap, int[] DateContext)
+        public override bool StepValue(bool ToNext, int[] ValueParts)
         {
             throw new NotImplementedException(); //Should not ever be called
         }
 
-        public override int Wrap(bool ToNext, out bool NoWrapMore, int[] DateContext)
+        public override bool Wrap(bool ToNext, int[] ValueParts)
         {
             throw new NotImplementedException(); //Should not ever be called
         }

@@ -2,15 +2,17 @@
 
 namespace Test
 {
-    
+
     public class AllowedDateTimePart
     {
 
         readonly int _minAllowed, _maxAllowed;
-        readonly bool[] _allowedValues=null; //If the instance allows any value, the allowed list reference is left null
+        readonly bool[] _allowedValues = null; //If the instance allows any value, the allowed list reference is left null
+        readonly int _partNumber;
         protected int FirstAllowedValue { get; private set; }
         protected int LastAllowedValue { get; private set; }
         public bool AllAllowed { get { return _allowedValues == null; } }
+        public int PartNumber { get { return _partNumber; } }
 
         static int? FindNextPrevValue(int StartValue, int StopValue, Boolean[] AllowedValues, int BaseValue)
         {
@@ -26,11 +28,12 @@ namespace Test
             return null;
         }
 
-        protected AllowedDateTimePart(int MinAllowed,int MaxAllowed,bool[] AllowedList)
+        protected AllowedDateTimePart(int MinAllowed, int MaxAllowed, bool[] AllowedList, int PartNumber)
         {
             _minAllowed = MinAllowed;
             _maxAllowed = MaxAllowed;
             _allowedValues = AllowedList;
+            _partNumber = PartNumber;
             if (_allowedValues != null)
             {
                 int? temp;
@@ -52,31 +55,33 @@ namespace Test
             return FindNextPrevValue(StartValue, StopValue, _allowedValues, _minAllowed);
         }
 
-        public static AllowedDateTimePart CreateDateTimePart(int MinAllowed, int MaxAllowed, bool[] AllowedList)
+        public static AllowedDateTimePart CreateDateTimePart(int MinAllowed, int MaxAllowed, bool[] AllowedList, int PartNumber)
         {
-            return new AllowedDateTimePart(MinAllowed, MaxAllowed, AllowedList);
+            return new AllowedDateTimePart(MinAllowed, MaxAllowed, AllowedList, PartNumber);
         }
-        public virtual bool ValueIsAllowed(int Value, int[] DateContext) {
+        public virtual bool ValueIsAllowed(int Value, int[] ValueParts) {
             if (AllAllowed) return true;
             return _allowedValues[Value-_minAllowed]; 
         }
 
 
-        public virtual int StepValue(int Value, bool ToNext, out bool NoWrap, int[] DateContext)
+        public virtual bool StepValue(bool ToNext, int[] ValueParts)
         {
+            int Value=ValueParts[PartNumber];
             //Search for the next allowed value forward/back
             int? result = FindNextPrevValue(Value, ToNext?_maxAllowed + 1: _minAllowed - 1, _allowedValues, _minAllowed);
-            NoWrap = result.HasValue;
-            if (result.HasValue) return result.Value; //Allowed value found in the rest of the range.
-            //No allowed value found in the rest of the range. Wrap shoud occur
-            //Search the first(or last) allowed value in the whole range of values
-            return ToNext ? FirstAllowedValue :LastAllowedValue;
+            if (result.HasValue) ValueParts[PartNumber] = result.Value;  //Allowed value found in the rest of the range.
+            else
+                //No allowed value found in the rest of the range. Wrap shoud occur
+                //Search the first(or last) allowed value in the whole range of values
+                ValueParts[PartNumber] = ToNext ? FirstAllowedValue :LastAllowedValue;
+            return result.HasValue;
         }
 
-        public virtual int Wrap(bool ToNext, out bool NoWrapMore, int[] DateContext)
+        public virtual bool Wrap(bool ToNext, int[] ValueParts)
         {
-            NoWrapMore = true; //The allowed value always exists (it was checked during schedule string parsing)
-            return ToNext ? FirstAllowedValue: LastAllowedValue;
+            ValueParts[PartNumber] = ToNext ? FirstAllowedValue: LastAllowedValue;
+            return true;//The allowed value always exists (it was checked during schedule string parsing)
         }
 
         public virtual bool IsCheckOnly { get { return false; } }

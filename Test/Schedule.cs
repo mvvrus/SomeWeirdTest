@@ -12,13 +12,13 @@ namespace Test
 	public class Schedule
 	{
 		static readonly AllowedDateTimePartCreator[] SchedulePartCreators = new AllowedDateTimePartCreator[PartConsts.NUM_PARTS] {
-			AllowedList=> AllowedDateTimePart.CreateDateTimePart(PartConsts.FIRST_MSEC, PartConsts.LAST_MSEC, AllowedList),
-			AllowedList=> AllowedDateTimePart.CreateDateTimePart(PartConsts.FIRST_SEC, PartConsts.LAST_SEC, AllowedList),
-			AllowedList=> AllowedDateTimePart.CreateDateTimePart(PartConsts.FIRST_MIN, PartConsts.LAST_MIN, AllowedList),
-			AllowedList=> AllowedDateTimePart.CreateDateTimePart(PartConsts.FIRST_HOUR, PartConsts.LAST_HOUR, AllowedList),
+			AllowedList=> AllowedDateTimePart.CreateDateTimePart(PartConsts.FIRST_MSEC, PartConsts.LAST_MSEC, AllowedList, PartConsts.MSECS),
+			AllowedList=> AllowedDateTimePart.CreateDateTimePart(PartConsts.FIRST_SEC, PartConsts.LAST_SEC, AllowedList, PartConsts.SECS),
+			AllowedList=> AllowedDateTimePart.CreateDateTimePart(PartConsts.FIRST_MIN, PartConsts.LAST_MIN, AllowedList, PartConsts.MINUTES),
+			AllowedList=> AllowedDateTimePart.CreateDateTimePart(PartConsts.FIRST_HOUR, PartConsts.LAST_HOUR, AllowedList, PartConsts.HOURS),
 			AllowedDayPart.CreateDateTimePart,
-			AllowedList=> AllowedDateTimePart.CreateDateTimePart(PartConsts.FIRST_MONTH, PartConsts.LAST_MONTH, AllowedList),
-			AllowedList=> AllowedDateTimePart.CreateDateTimePart(PartConsts.FIRST_YEAR, PartConsts.LAST_YEAR, AllowedList),
+			AllowedList=> AllowedDateTimePart.CreateDateTimePart(PartConsts.FIRST_MONTH, PartConsts.LAST_MONTH, AllowedList, PartConsts.MONTHS),
+			AllowedList=> AllowedDateTimePart.CreateDateTimePart(PartConsts.FIRST_YEAR, PartConsts.LAST_YEAR, AllowedList, PartConsts.YEARS),
 			AllowedDowPart.CreateDateTimePart
 		};
 
@@ -149,11 +149,10 @@ namespace Test
 							if (!still_valid) 
 								//Validation of this or some upper parts (including check-only ones on previous run of the outer do-while cycle) failed 
 								//or it's a first_step
-								ValueParts[part_number] =
-									ScheduleParts[part_number].StepValue(ValueParts[part_number], ToNext, out no_wrap, ValueParts);
+								no_wrap= ScheduleParts[part_number].StepValue(ToNext, ValueParts);
 						}
 						else //A step to next/prev value somewhere in the upper part processing occured.
-							ValueParts[part_number] = ScheduleParts[part_number].Wrap(ToNext, out no_wrap, ValueParts);
+							no_wrap = ScheduleParts[part_number].Wrap(ToNext, ValueParts);
 					}
 					if (no_wrap) part_number--; else part_number++; //Change part_number accordingly of wheather we need perform step on the upper part
 				} while (part_number >= 0 && part_number < PartConsts.NUM_PARTS); 
