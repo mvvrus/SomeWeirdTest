@@ -49,11 +49,31 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Test\AnyParser.cs">
+      <Link>AnyParser.cs</Link>
+    </Compile>
+    <Compile Include="..\Test\ListElementParser.cs">
+      <Link>ListElementParser.cs</Link>
+    </Compile>
+    <Compile Include="..\Test\ListParser.cs">
+      <Link>ListParser.cs</Link>
+    </Compile>
+    <Compile Include="..\Test\NumberParser.cs">
+      <Link>NumberParser.cs</Link>
+    </Compile>
+    <Compile Include="..\Test\RangeParser.cs">
+      <Link>RangeParser.cs</Link>
+    </Compile>
+    <Compile Include="..\Test\StepwiseParser.cs">
+      <Link>StepwiseParser.cs</Link>
+    </Compile>
     <Compile Include="..\Test\StringPart.cs">
       <Link>StringPart.cs</Link>
     </Compile>
     <Compile Include="StringPartTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ListElementParserTests.cs" />
+    <Compile Include="TestUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

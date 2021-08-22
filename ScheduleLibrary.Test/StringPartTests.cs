@@ -74,12 +74,24 @@ namespace ScheduleLibrary.Test
         public void NonEmptyStringPart_Properties()
         {
             StringPart t = new StringPart(STR);
-            Assert.AreEqual(STR.Length, t.Length);
+            Assert.AreEqual(5, t.Length);
             Assert.AreSame(STR, t.BaseString);
             Assert.AreEqual(0, t.Start);
-            Assert.AreEqual(STR.Length, t.End);
-            Assert.AreEqual(STR[2], t[2]);
-            Assert.ThrowsException<IndexOutOfRangeException>(() => t[STR.Length]);
+            Assert.AreEqual(5, t.End);
+            Assert.AreEqual('x', t[0]);
+            Assert.AreEqual('y', t[1]);
+            Assert.AreEqual('y', t[4]);
+            Assert.ThrowsException<IndexOutOfRangeException>(() => t[5]);
+            Assert.ThrowsException<IndexOutOfRangeException>(() => t[-1]);
+            t._start++;
+            t._end--;
+            Assert.AreEqual(3, t.Length);
+            Assert.AreEqual(1, t.Start);
+            Assert.AreEqual(4, t.End);
+            Assert.AreEqual('y', t[0]);
+            Assert.AreEqual('z', t[1]);
+            Assert.AreEqual('z', t[2]);
+            Assert.ThrowsException<IndexOutOfRangeException>(() => t[3]);
             Assert.ThrowsException<IndexOutOfRangeException>(() => t[-1]);
         }
 
@@ -173,6 +185,83 @@ namespace ScheduleLibrary.Test
             Assert.IsFalse(t.Add(STR, 1, 2));
             t.SetLength(1);
             Assert.ThrowsException<IndexOutOfRangeException>(() => t[1]);
+        }
+
+        [TestMethod]
+
+        public void StringPart_SplitTest()
+        {
+            StringPartArray space= new StringPartArray(3);
+            StringPartArray t;
+            t=(new StringPart(null)).Split(',',space);
+            Assert.IsNotNull(t);
+            Assert.AreEqual(1, t.Length);
+            Assert.AreEqual(0, t[0].Start);
+            Assert.AreEqual(0, t[0].End);
+            Assert.IsNull(t[0].BaseString);
+            t = (new StringPart("PART_ONE")).Split(',', space);
+            Assert.IsNotNull(t);
+            Assert.AreEqual(1, t.Length);
+            Assert.AreEqual("PART_ONE", t[0].ToString());
+            t = (new StringPart("PART_ONE,PART_TWO")).Split(',', space);
+            Assert.IsNotNull(t);
+            Assert.AreEqual(2, t.Length);
+            Assert.AreEqual("PART_ONE", t[0].ToString());
+            Assert.AreEqual("PART_TWO", t[1].ToString());
+            t = (new StringPart("PART_ONE,PART_TWO,PART_THREE")).Split(',', space);
+            Assert.IsNotNull(t);
+            Assert.AreEqual(3, t.Length);
+            Assert.AreEqual("PART_ONE", t[0].ToString());
+            Assert.AreEqual("PART_TWO", t[1].ToString());
+            Assert.AreEqual("PART_THREE", t[2].ToString());
+            t = (new StringPart("PART_ONE,PART_TWO,PART_THREE,PART_FOUR")).Split(',', space);
+            Assert.IsNull(t);
+            StringPartArray space2 = new StringPartArray(2);
+            t = (new StringPart("PART_ONE,PART_TWO|PART_THREE,PART_FOUR")).Split(',', space);
+            Assert.IsNotNull(t);
+            Assert.AreEqual(3, t.Length);
+            Assert.AreEqual("PART_ONE", t[0].ToString());
+            Assert.AreEqual("PART_TWO|PART_THREE", t[1].ToString());
+            Assert.AreEqual("PART_FOUR", t[2].ToString());
+            StringPartArray t2 = t;
+            t = t2[1].Split('|', space2);
+            Assert.IsNotNull(t);
+            Assert.AreEqual(2, t.Length);
+            Assert.AreEqual("PART_TWO", t[0].ToString());
+            Assert.AreEqual("PART_THREE", t[1].ToString());
+            t = t2[0].Split('|', space2);
+            Assert.IsNotNull(t);
+            Assert.AreEqual(1, t.Length);
+            Assert.AreEqual("PART_ONE", t[0].ToString());
+            t = "PART_ONE,PART_TWO".Split(',', space);
+            Assert.IsNotNull(t);
+            Assert.AreEqual(2, t.Length);
+            Assert.AreEqual("PART_ONE", t[0].ToString());
+            Assert.AreEqual("PART_TWO", t[1].ToString());
+            t = (new StringPart(",PART_TWO,PART_THREE")).Split(',', space);
+            Assert.IsNotNull(t);
+            Assert.AreEqual(3, t.Length);
+            Assert.AreEqual("", t[0].ToString());
+            Assert.AreEqual("PART_TWO", t[1].ToString());
+            Assert.AreEqual("PART_THREE", t[2].ToString());
+            t = (new StringPart("PART_ONE,,PART_THREE")).Split(',', space);
+            Assert.IsNotNull(t);
+            Assert.AreEqual(3, t.Length);
+            Assert.AreEqual("PART_ONE", t[0].ToString());
+            Assert.AreEqual("", t[1].ToString());
+            Assert.AreEqual("PART_THREE", t[2].ToString());
+            t = (new StringPart("PART_ONE,PART_TWO,")).Split(',', space);
+            Assert.IsNotNull(t);
+            Assert.AreEqual(3, t.Length);
+            Assert.AreEqual("PART_ONE", t[0].ToString());
+            Assert.AreEqual("PART_TWO", t[1].ToString());
+            Assert.AreEqual("", t[2].ToString());
+            t = (new StringPart(",")).Split(',', space);
+            Assert.IsNotNull(t);
+            Assert.AreEqual(2, t.Length);
+            Assert.AreEqual("", t[0].ToString());
+            Assert.AreEqual("", t[1].ToString());
+
         }
 
     }

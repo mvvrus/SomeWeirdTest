@@ -31,7 +31,10 @@ namespace Test
         public int Start { get { return _start; } }
         public int End { get { return _end; } }
         public Char this[int Index] 
-        { get { if (_baseString != null) return _baseString[Index]; throw new IndexOutOfRangeException(); } }
+        { get{ 
+                if (_baseString != null && Index>=0 && Index<Length) return _baseString[Index+_start]; 
+                throw new IndexOutOfRangeException(); 
+             } }
         public bool Truncate(int NewLength)
         {
             if (NewLength < 0 || NewLength > Length) return false;
@@ -39,17 +42,21 @@ namespace Test
             return true;
         }
 
-        public StringPartArray Split(char Delimiter, ref StringPartArray ResultSpace)
+        public StringPartArray Split(char Delimiter, StringPartArray ResultSpace)
         {
             ResultSpace.SetLength(0);
-            if (_baseString == null) return ResultSpace;
+            if (_baseString == null)
+            {
+                ResultSpace.Add(null, 0, 0);
+                return ResultSpace;
+            }
             int nonchecked_yet_pos = _start;
             bool no_place_for_result;
             do
             {
                 int old_pos = nonchecked_yet_pos;
                 nonchecked_yet_pos = _baseString.IndexOf(Delimiter, nonchecked_yet_pos, _end-nonchecked_yet_pos) + 1; 
-                no_place_for_result = ResultSpace.Add(_baseString, old_pos, nonchecked_yet_pos == 0 ? _end: nonchecked_yet_pos-1); 
+                no_place_for_result = !ResultSpace.Add(_baseString, old_pos, nonchecked_yet_pos == 0 ? _end: nonchecked_yet_pos-1); 
             } while (nonchecked_yet_pos>0 && !no_place_for_result);
             return no_place_for_result ? null : ResultSpace;
         }
@@ -128,7 +135,7 @@ namespace Test
     {
         public static StringPartArray Split(this string SourceString, char Delimiter, StringPartArray ResultSpace)
         {
-            return new StringPart(SourceString).Split(Delimiter, ref ResultSpace);
+            return new StringPart(SourceString).Split(Delimiter, ResultSpace);
         }
 
 

@@ -32,7 +32,7 @@ namespace Test
 
         protected virtual StringPartArray SplitForParts(StringPart Part, Char Delim, StringPartArray SpaceForParts)
         {
-            return Part.Split(Delim, ref SpaceForParts);
+            return Part.Split(Delim, SpaceForParts);
         }
 
         public override bool Parse(in StringPart Part, ref bool[][] AllowedLists)
