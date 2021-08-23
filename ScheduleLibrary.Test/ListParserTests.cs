@@ -6,7 +6,7 @@ using Test;
 namespace ScheduleLibrary.Test
 {
     [TestClass]
-    public class ListElementParserTests
+    public class ListParserTests
     {
         [TestMethod]
         public void NumberParser_RecognizeTest()
@@ -221,19 +221,19 @@ namespace ScheduleLibrary.Test
         {
             StringPartArray space = new StringPartArray(13);
             StringPartArray t = "2-10/4,-6/4,7-/3,*/2,*/1a, */2,6-8/1,5-13/3,0-6/2,1-6/13,/10,bbb/3,aaa".Split(',', space);
-            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[0]));
-            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[1]));
-            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[2]));
-            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[3]));
-            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[4]));
-            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[5]));
-            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[6]));
-            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[7]));
-            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[8]));
-            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[9]));
-            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[10]));
-            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[11]));
-            Assert.IsFalse(StepwiseParser.STEPWISE_PARSER.Recognize(t[12]));
+            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[0])); //"2-10/4"
+            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[1])); //"-6/4"
+            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[2])); //"7-/3"
+            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[3])); //"*/2"
+            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[4])); //"*/1a"
+            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[5])); //" */2"
+            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[6])); //"6-8/1"
+            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[7])); //"5-13/3"
+            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[8])); //"0-6/2"
+            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[9])); //"1-6/13"
+            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[10])); //"/10"
+            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[11])); //"bbb/3"
+            Assert.IsFalse(StepwiseParser.STEPWISE_PARSER.Recognize(t[12])); //"aaa"
         }
 
         [TestMethod]
@@ -243,48 +243,111 @@ namespace ScheduleLibrary.Test
             StringPartArray t = "2-10/4,-6/4,7-/3,*/2,*/1a, */2,6-8/1,5-13/3,0-6/2,1-6/13,/10,bbb/3,aaa".Split(',', space);
             bool[] BoolMap = new bool[12];
             bool[] SaveMap = BoolMap;
-            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Parse(t[0], ref BoolMap, 1, 12));
+            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Parse(t[0], ref BoolMap, 1, 12)); //"2-10/4"
             Assert.IsTrue(TestUtils.CheckBoolMap(new int[] {2, 6, 10}, BoolMap, 1, 12));
             BoolMap = SaveMap;
             BoolMap.Reset();
-            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Parse(t[1], ref BoolMap, 1, 12));
+            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Parse(t[1], ref BoolMap, 1, 12)); //"-6/4"
             Assert.IsTrue(TestUtils.CheckBoolMap(new int[] {1, 5}, BoolMap, 1, 12));
             BoolMap = SaveMap;
             BoolMap.Reset();
-            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Parse(t[2], ref BoolMap, 1, 12));
+            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Parse(t[2], ref BoolMap, 1, 12)); //"7-/3"
             Assert.IsTrue(TestUtils.CheckBoolMap(new int[] {7, 10}, BoolMap, 1, 12));
             BoolMap = SaveMap;
             BoolMap.Reset();
-            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Parse(t[3], ref BoolMap, 1, 12));
+            Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Parse(t[3], ref BoolMap, 1, 12)); //"*/2"
             Assert.IsTrue(TestUtils.CheckBoolMap(new int[] {1, 3, 5, 7, 9, 11}, BoolMap, 1, 12));
             BoolMap = SaveMap;
             BoolMap.Reset();
-            Assert.IsFalse(StepwiseParser.STEPWISE_PARSER.Parse(t[4], ref BoolMap, 1, 12));
+            Assert.IsFalse(StepwiseParser.STEPWISE_PARSER.Parse(t[4], ref BoolMap, 1, 12)); //"*/1a"
             BoolMap = SaveMap;
             BoolMap.Reset();
-            Assert.IsFalse(StepwiseParser.STEPWISE_PARSER.Parse(t[5], ref BoolMap, 1, 12));
+            Assert.IsFalse(StepwiseParser.STEPWISE_PARSER.Parse(t[5], ref BoolMap, 1, 12)); //" */2"
             BoolMap = SaveMap;
             BoolMap.Reset();
-            Assert.IsFalse(StepwiseParser.STEPWISE_PARSER.Parse(t[6], ref BoolMap, 1, 12));
+            Assert.IsFalse(StepwiseParser.STEPWISE_PARSER.Parse(t[6], ref BoolMap, 1, 12)); //"6-8/1"
             BoolMap = SaveMap;
             BoolMap.Reset();
-            Assert.IsFalse(StepwiseParser.STEPWISE_PARSER.Parse(t[7], ref BoolMap, 1, 12));
+            Assert.IsFalse(StepwiseParser.STEPWISE_PARSER.Parse(t[7], ref BoolMap, 1, 12)); //"5-13/3"
             BoolMap = SaveMap;
             BoolMap.Reset();
-            Assert.IsFalse(StepwiseParser.STEPWISE_PARSER.Parse(t[8], ref BoolMap, 1, 12));
+            Assert.IsFalse(StepwiseParser.STEPWISE_PARSER.Parse(t[8], ref BoolMap, 1, 12)); //"0-6/2"
             BoolMap = SaveMap;
             BoolMap.Reset();
-            Assert.IsFalse(StepwiseParser.STEPWISE_PARSER.Parse(t[9], ref BoolMap, 1, 12));
+            Assert.IsFalse(StepwiseParser.STEPWISE_PARSER.Parse(t[9], ref BoolMap, 1, 12)); //"1-6/13"
             BoolMap = SaveMap;
             BoolMap.Reset();
-            Assert.IsFalse(StepwiseParser.STEPWISE_PARSER.Parse(t[10], ref BoolMap, 1, 12));
+            Assert.IsFalse(StepwiseParser.STEPWISE_PARSER.Parse(t[10], ref BoolMap, 1, 12)); //"/10"
             BoolMap = SaveMap;
             BoolMap.Reset();
-            Assert.IsFalse(StepwiseParser.STEPWISE_PARSER.Parse(t[11], ref BoolMap, 1, 12));
+            Assert.IsFalse(StepwiseParser.STEPWISE_PARSER.Parse(t[11], ref BoolMap, 1, 12)); //"bbb/3"
             BoolMap = SaveMap;
             BoolMap.Reset();
-            Assert.IsFalse(StepwiseParser.STEPWISE_PARSER.Parse(t[12], ref BoolMap, 1, 12));
+            Assert.IsFalse(StepwiseParser.STEPWISE_PARSER.Parse(t[12], ref BoolMap, 1, 12)); //"aaa"
         }
+
+        [TestMethod]
+        public void ListParser_ParseTest()
+        {
+            ListParser parser = new ListParser(1, 12);
+            const String test_cases = "5;3,7;1-3,5-8/2,10;*/2,2,3;*;1,*,3,4-6,9-/2;*,*/2;;1,2,;0,1;2,*/1;3,* ,4;3,0-2;3,*,13";
+            const char case_delim = ';';
+            StringPartArray space = new StringPartArray(test_cases.Count(c => c == case_delim)+1);
+            bool[] BoolMap = new bool[12];
+            bool[] SaveMap = BoolMap;
+            StringPartArray t = test_cases.Split(case_delim, space);
+            Assert.IsTrue(parser.Parse(t[0],ref BoolMap)); //"5"
+            Assert.IsTrue(TestUtils.CheckBoolMap(new int[] { 5 }, BoolMap, 1, 12));
+            BoolMap = SaveMap;
+            BoolMap.Reset();
+            Assert.IsTrue(parser.Parse(t[1], ref BoolMap)); //"3,7"
+            Assert.IsTrue(TestUtils.CheckBoolMap(new int[] { 3,7 }, BoolMap, 1, 12));
+            Assert.IsFalse(TestUtils.CheckBoolMap(new int[] { 5,7 }, BoolMap, 1, 12));
+            BoolMap = SaveMap;
+            BoolMap.Reset();
+            Assert.IsTrue(parser.Parse(t[2], ref BoolMap)); //"1-3,5-8/2,10"
+            Assert.IsTrue(TestUtils.CheckBoolMap(new int[] {1,2,3,5,7,10 }, BoolMap, 1, 12));
+            BoolMap = SaveMap;
+            BoolMap.Reset();
+            Assert.IsTrue(parser.Parse(t[3], ref BoolMap));//"*/2,2,3"
+            Assert.IsTrue(TestUtils.CheckBoolMap(new int[] { 1, 2, 3, 5, 7, 9, 11 }, BoolMap, 1, 12));
+            BoolMap = SaveMap;
+            BoolMap.Reset();
+            Assert.IsTrue(parser.Parse(t[4], ref BoolMap));//"*"
+            Assert.IsTrue(TestUtils.CheckBoolMap(null, BoolMap, 1, 12));
+            BoolMap = SaveMap;
+            BoolMap.Reset();
+            Assert.IsTrue(parser.Parse(t[5], ref BoolMap));//"1,*,3,4-6,9-/2"
+            Assert.IsTrue(TestUtils.CheckBoolMap(null, BoolMap, 1, 12));
+            BoolMap = SaveMap;
+            BoolMap.Reset();
+            Assert.IsTrue(parser.Parse(t[6], ref BoolMap));//"*,*/2"
+            Assert.IsTrue(TestUtils.CheckBoolMap(null, BoolMap, 1, 12));
+            BoolMap = SaveMap;
+            BoolMap.Reset();
+            Assert.IsFalse(parser.Parse(t[7], ref BoolMap)); //""
+            BoolMap = SaveMap;
+            BoolMap.Reset();
+            Assert.IsFalse(parser.Parse(t[8], ref BoolMap)); //"1,2,"
+            BoolMap = SaveMap;
+            BoolMap.Reset();
+            Assert.IsFalse(parser.Parse(t[9], ref BoolMap)); //"0,1"
+            BoolMap = SaveMap;
+            BoolMap.Reset();
+            Assert.IsFalse(parser.Parse(t[10], ref BoolMap)); //"2,*/1"
+            BoolMap = SaveMap;
+            BoolMap.Reset();
+            Assert.IsFalse(parser.Parse(t[11], ref BoolMap)); //"3,* ,4"
+            BoolMap = SaveMap;
+            BoolMap.Reset();
+            Assert.IsFalse(parser.Parse(t[12], ref BoolMap)); //"3,0-2"
+            BoolMap = SaveMap;
+            BoolMap.Reset();
+            Assert.IsFalse(parser.Parse(t[13], ref BoolMap)); //"3,*,13"
+            BoolMap = SaveMap;
+            BoolMap.Reset();
+        }
+
 
     }
 }

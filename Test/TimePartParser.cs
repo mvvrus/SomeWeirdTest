@@ -17,7 +17,6 @@ namespace Test
             new PartListParserSpecifier(PartConsts.SECS, PartConsts.FIRST_SEC, PartConsts.LAST_SEC),
             new PartListParserSpecifier(PartConsts.MSECS, PartConsts.FIRST_MSEC, PartConsts.LAST_MSEC)
         };
-        const int SEC_POS= 2;
         const string STR_ZERO = "0";
 
         static readonly StringPartArray _timeParts = new StringPartArray(_partParsers.Length);
@@ -29,17 +28,14 @@ namespace Test
             StringPartArray result = base.SplitForParts(Part, Delim, SpaceForParts);
             if(result!=null ) 
             {
-                if (result.Length == SEC_POS + 1)
+                int sec_pos = 2;
+                int dot_pos = result[sec_pos].IndexOf(MSEC_DELIM);
+                if (dot_pos >= 0)
                 {
-                    int dot_pos = result[SEC_POS].IndexOf(MSEC_DELIM);
-                    if (dot_pos >= 0)
-                    {
-                        result.Add(result[SEC_POS].BaseString, result[SEC_POS].Start + dot_pos + 1, result[SEC_POS].End);
-                        result[SEC_POS].Truncate(dot_pos);
-                    }
-                    else result.Add(STR_ZERO, 0, STR_ZERO.Length);
+                    result.Add(result[sec_pos].BaseString, result[sec_pos].Start + dot_pos + 1, result[sec_pos].End);
+                    result[sec_pos].Truncate(dot_pos);
                 }
-                else result = null;
+                else result.Add(STR_ZERO, 0, STR_ZERO.Length);
             }
             return result;
         }

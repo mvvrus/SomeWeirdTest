@@ -24,15 +24,11 @@ namespace Test
             return PartConsts.DAYS_IN_MONTHS[CurrentMonth - PartConsts.FIRST_MONTH] + (LeapYear && CurrentMonth == PartConsts.FEBRUARY_MONTH ? 1 : 0);
         }
 
-        bool IsLeapYear(int Year)
-        {
-            return Year % 4 == 0 && Year % 400 != 0;
-        }
 
         public override bool ValueIsAllowed(int Value, int[] ValueParts)
         {
             int current_month = ValueParts[PartConsts.MONTHS];
-            bool leap_year = IsLeapYear(ValueParts[PartConsts.YEARS]);
+            bool leap_year = PartConsts.IsLeapYear(ValueParts[PartConsts.YEARS]);
             return base.ValueIsAllowed(Value,ValueParts) && Value<=GetMaxAllowed(current_month,leap_year) || 
                 Value== this.GetMaxAllowed(current_month, leap_year) && base.ValueIsAllowed(PartConsts.LAST_DAY_IN_MONTH, ValueParts);
         }
@@ -44,7 +40,7 @@ namespace Test
             bool NoWrap = base.StepValue(ToNext, ValueParts);
             Value = ValueParts[PartNumber];
             int current_month = ValueParts[PartConsts.MONTHS];
-            bool leap_year = IsLeapYear(ValueParts[PartConsts.YEARS]);
+            bool leap_year = PartConsts.IsLeapYear(ValueParts[PartConsts.YEARS]);
             int last_day_in_this_month = GetMaxAllowed(current_month,leap_year);
             if (Value> last_day_in_this_month) {
                 if (NoWrap ) //We would find a good next day in the current month if it were longer
@@ -74,7 +70,7 @@ namespace Test
             bool NoWrapMore = base.Wrap(ToNext, ValueParts);
             //The allowed day in this month may not exist, if all allowed days fall beyond the end of the month
             int current_month = ValueParts[PartConsts.MONTHS];
-            bool leap_year = IsLeapYear(ValueParts[PartConsts.YEARS]);
+            bool leap_year = PartConsts.IsLeapYear(ValueParts[PartConsts.YEARS]);
             int last_day_in_this_month = GetMaxAllowed(current_month,leap_year);
             if (ValueParts[PartNumber]> last_day_in_this_month)
             {

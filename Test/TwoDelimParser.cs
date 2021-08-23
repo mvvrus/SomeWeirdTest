@@ -32,20 +32,25 @@ namespace Test
 
         protected virtual StringPartArray SplitForParts(StringPart Part, Char Delim, StringPartArray SpaceForParts)
         {
-            return Part.Split(Delim, SpaceForParts);
-        }
-
-        public override bool Parse(in StringPart Part, ref bool[][] AllowedLists)
-        {
-            StringPartArray parts = SplitForParts(Part, _delim, _spaceForParts);
-            bool result = false;
-            if (parts != null)
-                for (int i = 0; i < parts.Length; i++)
-                    result = result && _partParsers[i].Parser.Parse(parts[i],ref AllowedLists[_partParsers[i].Index]);
+            StringPartArray result = Part.Split(Delim, SpaceForParts);
+            if (result != null && result.Length != 3) result = null;
             return result;
         }
 
-        public override bool Recognize(in StringPart Part)
+        public override bool Parse(StringPart Part, ref bool[][] AllowedLists)
+        {
+            StringPartArray parts = SplitForParts(Part, _delim, _spaceForParts);
+            bool result = true;
+            if (parts != null)
+                for (int i = 0; i < parts.Length && result; i++)
+                {
+                    result = result && _partParsers[i].Parser.Parse(parts[i], ref AllowedLists[_partParsers[i].Index]);
+                }
+            else result = false;
+            return result;
+        }
+
+        public override bool Recognize(StringPart Part)
         {
             int pos_delim_1 = Part.IndexOf(_delim);
             int pos_delim_2 = pos_delim_1 >= 0 ? Part.IndexOf(_delim, pos_delim_1 + 1) : -1;

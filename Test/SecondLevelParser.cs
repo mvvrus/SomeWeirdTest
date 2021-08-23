@@ -11,8 +11,8 @@ namespace Test
 {
 	public abstract class SecondLevelParser
 	{
-		public abstract bool Recognize(in StringPart Part);
-		public abstract bool Parse(in StringPart Part, ref bool[][] AllowedLists);
+		public abstract bool Recognize(StringPart Part);
+		public abstract bool Parse(StringPart Part, ref bool[][] AllowedLists);
 	}
 
 }

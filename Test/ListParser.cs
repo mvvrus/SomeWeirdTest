@@ -64,7 +64,7 @@ namespace Test
             {
                 ReleaseWorkPart(work_part);
             }
-            bool result = AllowedList!=null;
+            bool result = AllowedList==null;
             for (int i = 0; !result && i < array_length; i++)
                 result = result || AllowedList[i];
             return result;

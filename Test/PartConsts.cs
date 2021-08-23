@@ -25,5 +25,10 @@
         internal const int DAYS_IN_WEEK = 7;
         internal const int MSECS = 0, SECS = 1, MINUTES = 2, HOURS = 3, DAYS = 4, MONTHS = 5, YEARS = 6, DOW = 7;
         internal const int NUM_PARTS = 8;
+
+        static internal bool IsLeapYear(int Year)
+        {
+            return Year % 4 == 0 && Year % 400 != 0;
+        }
     }
 }

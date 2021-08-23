@@ -47,7 +47,7 @@ namespace Test
             }
             int result = 0;
             for(int year=first_year;year<last_year;year++)
-                if(year % 4 == 0 && year % 400 != 0) result++;
+                if(PartConsts.IsLeapYear(year)) result++;
             return result;
         }
 

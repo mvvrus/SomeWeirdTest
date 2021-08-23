@@ -52,6 +52,12 @@
     <Compile Include="..\Test\AnyParser.cs">
       <Link>AnyParser.cs</Link>
     </Compile>
+    <Compile Include="..\Test\DatePartParser.cs">
+      <Link>DatePartParser.cs</Link>
+    </Compile>
+    <Compile Include="..\Test\DayOfWeekPartParser.cs">
+      <Link>DayOfWeekPartParser.cs</Link>
+    </Compile>
     <Compile Include="..\Test\ListElementParser.cs">
       <Link>ListElementParser.cs</Link>
     </Compile>
@@ -61,8 +67,14 @@
     <Compile Include="..\Test\NumberParser.cs">
       <Link>NumberParser.cs</Link>
     </Compile>
+    <Compile Include="..\Test\PartConsts.cs">
+      <Link>PartConsts.cs</Link>
+    </Compile>
     <Compile Include="..\Test\RangeParser.cs">
       <Link>RangeParser.cs</Link>
+    </Compile>
+    <Compile Include="..\Test\SecondLevelParser.cs">
+      <Link>SecondLevelParser.cs</Link>
     </Compile>
     <Compile Include="..\Test\StepwiseParser.cs">
       <Link>StepwiseParser.cs</Link>
@@ -70,10 +82,17 @@
     <Compile Include="..\Test\StringPart.cs">
       <Link>StringPart.cs</Link>
     </Compile>
+    <Compile Include="..\Test\TimePartParser.cs">
+      <Link>TimePartParser.cs</Link>
+    </Compile>
+    <Compile Include="..\Test\TwoDelimParser.cs">
+      <Link>TwoDelimParser.cs</Link>
+    </Compile>
     <Compile Include="StringPartTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ListElementParserTests.cs" />
+    <Compile Include="ListParserTests.cs" />
     <Compile Include="TestUtils.cs" />
+    <Compile Include="SecondLevelParserTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

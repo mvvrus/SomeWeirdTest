@@ -23,5 +23,12 @@ namespace ScheduleLibrary.Test
         {
             for (int i = 0; i < BoolMap.Length; i++) BoolMap[i] = false;
         }
+
+        static public bool CheckMapAbsence(int[] NoCheckFor, bool[][] AllowedLists)
+        {
+            for (int i = 0; i < AllowedLists.Length; i++)
+                if (AllowedLists[i] != null && NoCheckFor.All(value => value != i)) return false;
+            return true;
+        }
     }
 }
