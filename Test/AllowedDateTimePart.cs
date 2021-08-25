@@ -14,7 +14,7 @@ namespace Test
         public bool AllAllowed { get { return _allowedValues == null; } }
         public int PartNumber { get { return _partNumber; } }
 
-        static int? FindNextPrevValue(int StartValue, int StopValue, Boolean[] AllowedValues, int BaseValue)
+        protected static int? FindNextPrevValue(int StartValue, int StopValue, Boolean[] AllowedValues, int BaseValue)
         {
             int step = StopValue >= StartValue ? 1 : -1;
             int curvalue = StartValue;

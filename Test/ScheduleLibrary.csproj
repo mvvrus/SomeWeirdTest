@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AllowedDateTimePart.cs" />
+    <Compile Include="AllowedDateTimePartMapped.cs" />
     <Compile Include="AllowedDayPart.cs" />
     <Compile Include="AllowedDowPart.cs" />
     <Compile Include="AnyParser.cs" />
