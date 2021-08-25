@@ -206,5 +206,99 @@ namespace ScheduleLibrary.Test
             Clear();
             Assert.IsFalse(parser.Parse(t[25], ref AllowedLists)); //"05.*.c"
         }
+
+        const string _timeTests = "17:20:03|17:20:03.525|0,23:0,59:0,59.0,999|24:03:20.525|17:60:20.525|17:03:60.525|17:03:20.1000|*:*:*.*|*:*:*"
+            + "|:20:03.525|17::03.525|17:20:.525|17:20:03.||17.525|17:20.525";
+        int[] _timeParts = new int[] { PartConsts.HOURS, PartConsts.MINUTES, PartConsts.SECS, PartConsts.MSECS };
+
+        [TestMethod]
+        public void TimePartParser_RecognizeTest()
+        {
+            TimePartParser parser = new TimePartParser();
+            StringPartArray space = new StringPartArray(_timeTests.Count(c => c == _delim) + 1);
+            StringPartArray t = _timeTests.Split(_delim, space);
+            Assert.IsTrue(parser.Recognize(t[0])); //"17:20:03"
+            Assert.IsTrue(parser.Recognize(t[1])); //"17:20:03.525"
+            Assert.IsTrue(parser.Recognize(t[2])); //"0,23:0,59:0,59.0,999"
+            Assert.IsTrue(parser.Recognize(t[3])); //"24:03:20.525"
+            Assert.IsTrue(parser.Recognize(t[4])); //"17:60:20.525"
+            Assert.IsTrue(parser.Recognize(t[5])); //"17:03:60.525"
+            Assert.IsTrue(parser.Recognize(t[6])); //"17:03:20.1000"
+            Assert.IsTrue(parser.Recognize(t[7])); //"*:*:*.*"
+            Assert.IsTrue(parser.Recognize(t[8])); //"*:*:*.*"
+            Assert.IsTrue(parser.Recognize(t[9])); //":20:03.525"
+            Assert.IsTrue(parser.Recognize(t[10])); //"17::03.525"
+            Assert.IsTrue(parser.Recognize(t[11])); //"17:20:.525"
+            Assert.IsTrue(parser.Recognize(t[12])); //"17:20:03."
+            Assert.IsFalse(parser.Recognize(t[13])); //""
+            Assert.IsFalse(parser.Recognize(t[14])); //"17.525"
+            Assert.IsFalse(parser.Recognize(t[15])); //"17:20.525"
+
+        }
+
+        [TestMethod]
+        public void TimePartParser_ParseTest()
+        {
+            TimePartParser parser = new TimePartParser();
+            StringPartArray space = new StringPartArray(_timeTests.Count(c => c == _delim) + 1);
+            StringPartArray t = _timeTests.Split(_delim, space);
+            Clear();
+            Assert.IsTrue(parser.Parse(t[0], ref AllowedLists)); //"17:20:03"
+            Assert.IsTrue(TestUtils.CheckMapAbsence(_timeParts, AllowedLists));
+            Assert.IsTrue(TestUtils.CheckBoolMap(new int[] { 17 }, AllowedLists[PartConsts.HOURS], PartConsts.FIRST_HOUR, PartConsts.LAST_HOUR));
+            Assert.IsTrue(TestUtils.CheckBoolMap(new int[] { 20 }, AllowedLists[PartConsts.MINUTES], PartConsts.FIRST_MIN, PartConsts.LAST_MIN));
+            Assert.IsTrue(TestUtils.CheckBoolMap(new int[] { 3 }, AllowedLists[PartConsts.SECS], PartConsts.FIRST_SEC, PartConsts.LAST_SEC));
+            Assert.IsTrue(TestUtils.CheckBoolMap(new int[] { 0 }, AllowedLists[PartConsts.MSECS], PartConsts.FIRST_MSEC, PartConsts.LAST_MSEC));
+            Clear();
+            Assert.IsTrue(parser.Parse(t[1], ref AllowedLists)); //"17:20:03.525"
+            Assert.IsTrue(TestUtils.CheckMapAbsence(_timeParts, AllowedLists));
+            Assert.IsTrue(TestUtils.CheckBoolMap(new int[] { 17 }, AllowedLists[PartConsts.HOURS], PartConsts.FIRST_HOUR, PartConsts.LAST_HOUR));
+            Assert.IsTrue(TestUtils.CheckBoolMap(new int[] { 20 }, AllowedLists[PartConsts.MINUTES], PartConsts.FIRST_MIN, PartConsts.LAST_MIN));
+            Assert.IsTrue(TestUtils.CheckBoolMap(new int[] { 3 }, AllowedLists[PartConsts.SECS], PartConsts.FIRST_SEC, PartConsts.LAST_SEC));
+            Assert.IsTrue(TestUtils.CheckBoolMap(new int[] { 525 }, AllowedLists[PartConsts.MSECS], PartConsts.FIRST_MSEC, PartConsts.LAST_MSEC));
+            Clear();
+            Assert.IsTrue(parser.Parse(t[2], ref AllowedLists)); //"0,23:0,59:0,59.0,999"
+            Assert.IsTrue(TestUtils.CheckMapAbsence(_timeParts, AllowedLists));
+            Assert.IsTrue(TestUtils.CheckBoolMap(new int[] { 0,23 }, AllowedLists[PartConsts.HOURS], PartConsts.FIRST_HOUR, PartConsts.LAST_HOUR));
+            Assert.IsTrue(TestUtils.CheckBoolMap(new int[] { 0,59 }, AllowedLists[PartConsts.MINUTES], PartConsts.FIRST_MIN, PartConsts.LAST_MIN));
+            Assert.IsTrue(TestUtils.CheckBoolMap(new int[] { 0,59 }, AllowedLists[PartConsts.SECS], PartConsts.FIRST_SEC, PartConsts.LAST_SEC));
+            Assert.IsTrue(TestUtils.CheckBoolMap(new int[] { 0,999 }, AllowedLists[PartConsts.MSECS], PartConsts.FIRST_MSEC, PartConsts.LAST_MSEC));
+            Clear();
+            Assert.IsFalse(parser.Parse(t[3], ref AllowedLists)); //"24:03:20.525"
+            Clear();
+            Assert.IsFalse(parser.Parse(t[4], ref AllowedLists)); //"17:60:20.525"
+            Clear();
+            Assert.IsFalse(parser.Parse(t[5], ref AllowedLists)); //"17:03:60.525"
+            Clear();
+            Assert.IsFalse(parser.Parse(t[6], ref AllowedLists)); //"17:03:20.1000"
+            Clear();
+            Assert.IsTrue(parser.Parse(t[7], ref AllowedLists)); //"*:*:*.*"
+            Assert.IsTrue(TestUtils.CheckMapAbsence(_timeParts, AllowedLists));
+            Assert.IsTrue(TestUtils.CheckBoolMap(null, AllowedLists[PartConsts.HOURS], PartConsts.FIRST_HOUR, PartConsts.LAST_HOUR));
+            Assert.IsTrue(TestUtils.CheckBoolMap(null, AllowedLists[PartConsts.MINUTES], PartConsts.FIRST_MIN, PartConsts.LAST_MIN));
+            Assert.IsTrue(TestUtils.CheckBoolMap(null, AllowedLists[PartConsts.SECS], PartConsts.FIRST_SEC, PartConsts.LAST_SEC));
+            Assert.IsTrue(TestUtils.CheckBoolMap(null, AllowedLists[PartConsts.MSECS], PartConsts.FIRST_MSEC, PartConsts.LAST_MSEC));
+            Clear();
+            Assert.IsTrue(parser.Parse(t[8], ref AllowedLists)); //"*:*:*"
+            Assert.IsTrue(TestUtils.CheckMapAbsence(_timeParts, AllowedLists));
+            Assert.IsTrue(TestUtils.CheckBoolMap(null, AllowedLists[PartConsts.HOURS], PartConsts.FIRST_HOUR, PartConsts.LAST_HOUR));
+            Assert.IsTrue(TestUtils.CheckBoolMap(null, AllowedLists[PartConsts.MINUTES], PartConsts.FIRST_MIN, PartConsts.LAST_MIN));
+            Assert.IsTrue(TestUtils.CheckBoolMap(null, AllowedLists[PartConsts.SECS], PartConsts.FIRST_SEC, PartConsts.LAST_SEC));
+            Assert.IsTrue(TestUtils.CheckBoolMap(new int[] { 0 }, AllowedLists[PartConsts.MSECS], PartConsts.FIRST_MSEC, PartConsts.LAST_MSEC));
+            Clear();
+            Assert.IsFalse(parser.Parse(t[9], ref AllowedLists)); //":20:03.525"
+            Clear();
+            Assert.IsFalse(parser.Parse(t[10], ref AllowedLists)); //"17::03.525"
+            Clear();
+            Assert.IsFalse(parser.Parse(t[11], ref AllowedLists)); //"17:20:.525"
+            Clear();
+            Assert.IsFalse(parser.Parse(t[12], ref AllowedLists)); //"17:20:03."
+            Clear();
+            Assert.IsFalse(parser.Parse(t[13], ref AllowedLists)); //""
+            Clear();
+            Assert.IsFalse(parser.Parse(t[14], ref AllowedLists)); //"17.525"
+            Clear();
+            Assert.IsFalse(parser.Parse(t[15], ref AllowedLists)); //"17:20.525"
+        }
     }
 }
