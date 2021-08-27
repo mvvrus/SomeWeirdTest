@@ -25,7 +25,7 @@ namespace Test
 		static readonly SecondLevelParser[][] SecondLevelParsers = new SecondLevelParser[][] {
 			new SecondLevelParser[] {new DatePartParser(), new DayOfWeekPartParser(), new TimePartParser() }, //yyyy.MM.dd w HH:mm:ss.fff, yyyy.MM.dd w HH:mm:ss
 			new SecondLevelParser[] {new DatePartParser(), new TimePartParser() },                            //yyyy.MM.dd HH:mm:ss.fff, yyyy.MM.dd HH:mm:ss 
-			new SecondLevelParser[] {new DatePartParser() },                                                  //HH:mm:ss.fff., HH:mm:ss
+			new SecondLevelParser[] {new TimePartParser() },                                                  //HH:mm:ss.fff., HH:mm:ss
 		};
 
 		const int MAX_SCHEDULE_PARTS = 3;
@@ -34,7 +34,7 @@ namespace Test
         {
 			return scheduleString.Split(' ', _mainPartsSpace);
         }
-		static void MainParser(String scheduleString, ref bool[][] AllowedLists)
+		static internal void MainParser(String scheduleString, bool[][] AllowedLists)
         {
 			lock(_mainPartsSpace)
             {
@@ -78,7 +78,7 @@ namespace Test
 		{
 			bool[][] AllowedLists = new bool[PartConsts.NUM_PARTS][];
 			if (scheduleString != null)
-				MainParser(scheduleString, ref AllowedLists);
+				MainParser(scheduleString, AllowedLists);
 			for (int i = 0; i < PartConsts.NUM_PARTS; i++)
 				ScheduleParts[i] = SchedulePartCreators[i](AllowedLists[i]);
 		}
