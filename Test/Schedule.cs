@@ -118,17 +118,17 @@ namespace Test
 			//Do nothing
 		}
 
-		Boolean CheckCurrentEvent(int[] ValueParts)
+		internal Boolean CheckCurrentEvent(int[] ValueParts)
 		{
 			for (int i = 0; i < PartConsts.NUM_PARTS; i++)
 			{
 				
-				if (!ScheduleParts[i].ValueIsAllowed(ValueParts[i],ValueParts)) return false;
+				if (!ScheduleParts[i].ValueIsAllowed(ValueParts)) return false;
 			}
 			return true;
 		}
 
-		bool StepToNearestEvent(bool ToNext, ref int[] ValueParts)
+		internal bool StepToNearestEvent(bool ToNext, ref int[] ValueParts)
         {
 			bool step_made;
 			int part_number = PartConsts.NUM_PARTS - 1;
@@ -145,7 +145,7 @@ namespace Test
 							if (still_valid) 
 								//Should continue validation from upper parts 
 								//if it's not the first part (for which a step is required)
-								still_valid = part_number>0 || ScheduleParts[part_number].ValueIsAllowed(ValueParts[part_number], ValueParts);
+								still_valid = part_number>0 && ScheduleParts[part_number].ValueIsAllowed(ValueParts);
 							if (!still_valid) 
 								//Validation of this or some upper parts (including check-only ones on previous run of the outer do-while cycle) failed 
 								//or it's a first_step
@@ -163,7 +163,7 @@ namespace Test
 					for (part_number = 0; part_number < PartConsts.NUM_PARTS; part_number++) {
 						if(ScheduleParts[part_number].IsCheckOnly)
                         {
-							if (!ScheduleParts[part_number].ValueIsAllowed(ValueParts[part_number], ValueParts))
+							if (!ScheduleParts[part_number].ValueIsAllowed(ValueParts))
                             {
 								//Validity of this part was violated (it's possible for composite part, like DayOfWeek, checks).
 								//Restart making the step from the first part, from which this composite part is dependent

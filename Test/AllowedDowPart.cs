@@ -51,7 +51,7 @@ namespace Test
             return result;
         }
 
-        public override bool ValueIsAllowed(int _1, int[] ValueParts)
+        public override bool ValueIsAllowed(int[] ValueParts)
         {
             //Has side effect! Computes and sets ValueParts[DOW] value.
             bool count_back = _startYear > ValueParts[PartConsts.YEARS] ||

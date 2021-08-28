@@ -25,8 +25,9 @@ namespace Test
         }
 
 
-        public override bool ValueIsAllowed(int Value, int[] ValueParts)
+        public override bool ValueIsAllowed(int[] ValueParts)
         {
+            int Value = ValueParts[PartNumber];
             int current_month = ValueParts[PartConsts.MONTHS];
             bool leap_year = PartConsts.IsLeapYear(ValueParts[PartConsts.YEARS]);
             return base.ValueIsAllowed(Value,ValueParts) && Value<=GetMaxAllowed(current_month,leap_year) || 

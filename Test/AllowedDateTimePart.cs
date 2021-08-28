@@ -59,11 +59,16 @@ namespace Test
         {
             return new AllowedDateTimePart(MinAllowed, MaxAllowed, AllowedList, PartNumber);
         }
-        public virtual bool ValueIsAllowed(int Value, int[] ValueParts) {
+        protected bool ValueIsAllowed(int Value, int[] ValueParts) {
             if (AllAllowed) return true;
             return _allowedValues[Value-_minAllowed]; 
         }
 
+        public virtual bool ValueIsAllowed(int[] ValueParts)
+        {
+            if (AllAllowed) return true;
+            return _allowedValues[ValueParts[PartNumber] - _minAllowed];
+        }
 
         public virtual bool StepValue(bool ToNext, int[] ValueParts)
         {
