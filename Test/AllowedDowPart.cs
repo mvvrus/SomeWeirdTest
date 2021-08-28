@@ -11,20 +11,24 @@ namespace Test
 
         readonly int _startDay, _startMonth, _startYear;
         readonly int _startDow;
-        AllowedDowPart(bool[] AllowedList, int PartNumber):base(PartConsts.FIRST_DOW, PartConsts.LAST_DOW,AllowedList, PartNumber)
+        AllowedDowPart(bool[] AllowedList): this(AllowedList, DateTime.Today)
         {
-            DateTime today = DateTime.Today;
-            _startDay = today.Day;
-            _startMonth = today.Month;
-            _startYear = today.Year;
-            _startDow = (int)today.DayOfWeek;
         }
+
+        internal AllowedDowPart(bool[] AllowedList, DateTime BaseDate) : base(PartConsts.FIRST_DOW, PartConsts.LAST_DOW, AllowedList, PartConsts.DOW)
+        {
+            _startDay = BaseDate.Day;
+            _startMonth = BaseDate.Month;
+            _startYear = BaseDate.Year;
+            _startDow = (int)BaseDate.DayOfWeek;
+        }
+
 
         public override bool IsCheckOnly { get { return true; } }
 
         public static AllowedDateTimePart CreateDateTimePart(bool[] AllowedList)
         {
-            return new AllowedDowPart(AllowedList, PartConsts.DOW);
+            return new AllowedDowPart(AllowedList);
         }
 
         int NumFebs29InRange(int[] ValueParts, bool CountBack)
@@ -41,12 +45,12 @@ namespace Test
             else
             {
                 first_year = _startYear;
-                if (_startYear > PartConsts.FEBRUARY_MONTH) first_year++;
+                if (_startMonth > PartConsts.FEBRUARY_MONTH) first_year++;
                 last_year = ValueParts[PartConsts.YEARS];
                 if (ValueParts[PartConsts.MONTHS] <= PartConsts.FEBRUARY_MONTH) last_year--;
             }
             int result = 0;
-            for(int year=first_year;year<last_year;year++)
+            for(int year=first_year;year<=last_year;year++)
                 if(PartConsts.IsLeapYear(year)) result++;
             return result;
         }
@@ -59,21 +63,30 @@ namespace Test
                 || _startMonth == ValueParts[PartConsts.MONTHS] && _startDay > ValueParts[PartConsts.DAYS]);
             int feb29_count = NumFebs29InRange (ValueParts, count_back);
 
-            int days_passed;
-            days_passed = (ValueParts[PartConsts.DAYS] - _startDay)+ DaysInMonthsPassedNonLeap(_startMonth, ValueParts[PartConsts.MONTHS])
-                +(ValueParts[PartConsts.YEARS]-_startYear)* PartConsts.DAYS_IN_NONLEAP_YEAR +(count_back?-feb29_count:feb29_count);
+            int days_passed,month_days_passed;
+            int month_int_start=_startMonth, month_int_end=ValueParts[PartConsts.MONTHS];
+            if(count_back)
+            {
+                month_int_start = ValueParts[PartConsts.MONTHS];
+                month_int_end = _startMonth; 
+            }
+            days_passed = (ValueParts[PartConsts.DAYS] - _startDay);
+            month_days_passed = DaysInMonthsPassedNonLeap(month_int_start, month_int_end);
+            if (count_back) month_days_passed = -month_days_passed;
+            days_passed += month_days_passed;
+            days_passed += (ValueParts[PartConsts.YEARS]-_startYear)* PartConsts.DAYS_IN_NONLEAP_YEAR +(count_back?-feb29_count:feb29_count);
             int dow = (_startDow + days_passed) % PartConsts.DAYS_IN_WEEK;
-            if (dow < 0) dow = (PartConsts.DAYS_IN_WEEK + _startDow) % PartConsts.DAYS_IN_WEEK;
+            if (dow < 0) dow = PartConsts.DAYS_IN_WEEK + dow;
             ValueParts[PartNumber] = dow;
             return base.ValueIsAllowed(dow, ValueParts);
         }
 
-        private int DaysInMonthsPassedNonLeap(int CurMonth, int MonthToCome)
+        private int DaysInMonthsPassedNonLeap(int MonthIntervalStart, int MonthIntervalEnd)
         {
             int result = 0;
-            int months_to_pass = (MonthToCome + PartConsts.MONTHS_IN_YEAR - CurMonth) % PartConsts.MONTHS_IN_YEAR;
+            int months_to_pass = (MonthIntervalEnd + PartConsts.MONTHS_IN_YEAR - MonthIntervalStart) % PartConsts.MONTHS_IN_YEAR;
             for (int i = 0; i<months_to_pass;i++) 
-                result+= PartConsts.DAYS_IN_MONTHS[(CurMonth+i- PartConsts.FIRST_MONTH) % PartConsts.MONTHS_IN_YEAR];
+                result+= PartConsts.DAYS_IN_MONTHS[(MonthIntervalStart+i- PartConsts.FIRST_MONTH) % PartConsts.MONTHS_IN_YEAR];
             return result;
         }
 

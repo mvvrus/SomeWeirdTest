@@ -100,12 +100,16 @@
     <Compile Include="..\Test\TwoDelimParser.cs">
       <Link>TwoDelimParser.cs</Link>
     </Compile>
+    <Compile Include="AllowedDateTimePartTests.cs" />
+    <Compile Include="AllowedDayPartTests.cs" />
     <Compile Include="MainParserTest.cs" />
+    <Compile Include="ScheduleSearchTests.cs" />
     <Compile Include="StringPartTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ListParserTests.cs" />
     <Compile Include="TestUtils.cs" />
     <Compile Include="SecondLevelParserTests.cs" />
+    <Compile Include="AllowedDowPartTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

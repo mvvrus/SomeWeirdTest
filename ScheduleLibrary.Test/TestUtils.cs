@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Test;
 
 namespace ScheduleLibrary.Test
 {
@@ -29,6 +27,27 @@ namespace ScheduleLibrary.Test
             for (int i = 0; i < AllowedLists.Length; i++)
                 if (AllowedLists[i] != null && NoCheckFor.All(value => value != i)) return false;
             return true;
+        }
+
+        static public bool[] MakeBoolMap (int[] ValuesToBeTrue, int Start, int End)
+        {
+            if (ValuesToBeTrue == null) return null;
+            bool[] result = new bool[End - Start + 1];
+            foreach (int ndx in ValuesToBeTrue) result[ndx - Start] = true;
+            return result;
+        }
+
+        static public int[] MakeValueParts(int Part, int Value)
+        {
+            int[] result = new int[PartConsts.NUM_PARTS];
+            result[Part] = Value;
+            return result;
+        }
+        static public int[] MakeValueParts(Tuple<int,int>[] PartValuePairs )
+        {
+            int[] result = new int[PartConsts.NUM_PARTS];
+            foreach(Tuple<int,int> pair in PartValuePairs) { result[pair.Item1] = pair.Item2; }
+            return result;
         }
     }
 }
