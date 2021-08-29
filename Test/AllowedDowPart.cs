@@ -59,8 +59,8 @@ namespace Test
         {
             //Has side effect! Computes and sets ValueParts[DOW] value.
             bool count_back = _startYear > ValueParts[PartConsts.YEARS] ||
-                (_startYear == ValueParts[PartConsts.YEARS] && (_startMonth > ValueParts[PartConsts.MONTHS])
-                || _startMonth == ValueParts[PartConsts.MONTHS] && _startDay > ValueParts[PartConsts.DAYS]);
+                (_startYear == ValueParts[PartConsts.YEARS] && ((_startMonth > ValueParts[PartConsts.MONTHS])
+                || _startMonth == ValueParts[PartConsts.MONTHS] && _startDay > ValueParts[PartConsts.DAYS]));
             int feb29_count = NumFebs29InRange (ValueParts, count_back);
 
             int days_passed,month_days_passed;
@@ -74,7 +74,11 @@ namespace Test
             month_days_passed = DaysInMonthsPassedNonLeap(month_int_start, month_int_end);
             if (count_back) month_days_passed = -month_days_passed;
             days_passed += month_days_passed;
-            days_passed += (ValueParts[PartConsts.YEARS]-_startYear)* PartConsts.DAYS_IN_NONLEAP_YEAR +(count_back?-feb29_count:feb29_count);
+            int full_years_passed = ValueParts[PartConsts.YEARS] - _startYear;
+            if (month_int_start > month_int_end) 
+                if (count_back) full_years_passed++; 
+                else  full_years_passed--;
+            days_passed += full_years_passed * PartConsts.DAYS_IN_NONLEAP_YEAR +(count_back?-feb29_count:feb29_count);
             int dow = (_startDow + days_passed) % PartConsts.DAYS_IN_WEEK;
             if (dow < 0) dow = PartConsts.DAYS_IN_WEEK + dow;
             ValueParts[PartNumber] = dow;

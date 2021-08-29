@@ -28,127 +28,73 @@ namespace ScheduleLibrary.Test
             Assert.IsFalse(t.ValueIsAllowed(parts));
         }
 
-        [TestMethod]
-        public void AllowedDowPartValueIsAllowedThisMonth_Tests()
+        void TestDatePairUnidir(DateTime DateBase, DateTime DateTest)
         {
             AllowedDateTimePart t;
             DateTime base_date;
             int[] parts;
-            base_date = new DateTime(2021, 8, 18);
-            t = new AllowedDowPart(TestUtils.MakeBoolMap(new int[] { 4 }, PartConsts.FIRST_DOW, PartConsts.LAST_DOW), base_date);
+            base_date = DateBase;
+            t = new AllowedDowPart(TestUtils.MakeBoolMap(new int[] { (int)DateTest.DayOfWeek }, PartConsts.FIRST_DOW, PartConsts.LAST_DOW), base_date);
             parts = TestUtils.MakeValueParts(new Tuple<int, int>[] {
-                new Tuple<int,int>(PartConsts.DAYS,26),
-                new Tuple<int, int>(PartConsts.MONTHS, 8),
-                new Tuple<int, int>(PartConsts.YEARS, 2021)
+                new Tuple<int,int>(PartConsts.DAYS,DateTest.Day),
+                new Tuple<int, int>(PartConsts.MONTHS, DateTest.Month),
+                new Tuple<int, int>(PartConsts.YEARS, DateTest.Year)
             });
             Assert.IsTrue(t.ValueIsAllowed(parts));
-            parts[PartConsts.DAYS] = 27;
-            Assert.IsFalse(t.ValueIsAllowed(parts));
+            DateTime DateTest2 = DateTest.AddDays(1);
             parts = TestUtils.MakeValueParts(new Tuple<int, int>[] {
-                new Tuple<int,int>(PartConsts.DAYS,5),
-                new Tuple<int, int>(PartConsts.MONTHS, 8),
-                new Tuple<int, int>(PartConsts.YEARS, 2021)
+                new Tuple<int,int>(PartConsts.DAYS,DateTest2.Day),
+                new Tuple<int, int>(PartConsts.MONTHS, DateTest2.Month),
+                new Tuple<int, int>(PartConsts.YEARS, DateTest2.Year)
             });
-            Assert.IsTrue(t.ValueIsAllowed(parts));
-            parts[PartConsts.DAYS] = 6;
             Assert.IsFalse(t.ValueIsAllowed(parts));
+        }
+
+        void TestDatePair(DateTime Date1, DateTime Date2)
+        {
+            TestDatePairUnidir(Date1, Date2);
+            TestDatePairUnidir(Date2, Date1);
+        }
+
+        [TestMethod]
+        public void AllowedDowPartValueIsAllowedThisMonth_Tests()
+        {
+            TestDatePair(new DateTime(2021, 8, 18), new DateTime(2021, 8, 26));
         }
 
         [TestMethod]
         public void AllowedDowPartValueIsAllowedThisNonLeapYear_Tests()
         {
-            AllowedDateTimePart t;
-            DateTime base_date;
-            int[] parts;
-            base_date = new DateTime(2021, 8, 28);
-            t = new AllowedDowPart(TestUtils.MakeBoolMap(new int[] { 4 }, PartConsts.FIRST_DOW, PartConsts.LAST_DOW), base_date);
-            parts = TestUtils.MakeValueParts(new Tuple<int, int>[] {
-                new Tuple<int,int>(PartConsts.DAYS,15),
-                new Tuple<int, int>(PartConsts.MONTHS, 4),
-                new Tuple<int, int>(PartConsts.YEARS, 2021)
-            });
-            Assert.IsTrue(t.ValueIsAllowed(parts));
-            parts[PartConsts.DAYS] = 16;
-            Assert.IsFalse(t.ValueIsAllowed(parts));
-            t = new AllowedDowPart(TestUtils.MakeBoolMap(new int[] { 1 }, PartConsts.FIRST_DOW, PartConsts.LAST_DOW), base_date);
-            parts = TestUtils.MakeValueParts(new Tuple<int, int>[] {
-                new Tuple<int,int>(PartConsts.DAYS,15),
-                new Tuple<int, int>(PartConsts.MONTHS, 2),
-                new Tuple<int, int>(PartConsts.YEARS, 2021)
-            });
-            Assert.IsTrue(t.ValueIsAllowed(parts));
-            parts[PartConsts.DAYS] = 16;
-            Assert.IsFalse(t.ValueIsAllowed(parts));
-
-            base_date = new DateTime(2021, 1, 28);
-            t = new AllowedDowPart(TestUtils.MakeBoolMap(new int[] { 1 }, PartConsts.FIRST_DOW, PartConsts.LAST_DOW), base_date);
-            parts = TestUtils.MakeValueParts(new Tuple<int, int>[] {
-                new Tuple<int,int>(PartConsts.DAYS,15),
-                new Tuple<int, int>(PartConsts.MONTHS, 2),
-                new Tuple<int, int>(PartConsts.YEARS, 2021)
-            });
-            Assert.IsTrue(t.ValueIsAllowed(parts));
-            parts[PartConsts.DAYS] = 16;
-            Assert.IsFalse(t.ValueIsAllowed(parts));
-
-            t = new AllowedDowPart(TestUtils.MakeBoolMap(new int[] { 4 }, PartConsts.FIRST_DOW, PartConsts.LAST_DOW), base_date);
-            parts = TestUtils.MakeValueParts(new Tuple<int, int>[] {
-                new Tuple<int,int>(PartConsts.DAYS,15),
-                new Tuple<int, int>(PartConsts.MONTHS, 4),
-                new Tuple<int, int>(PartConsts.YEARS, 2021)
-            });
-            Assert.IsTrue(t.ValueIsAllowed(parts));
-            parts[PartConsts.DAYS] = 16;
-            Assert.IsFalse(t.ValueIsAllowed(parts));
-
+            TestDatePair(new DateTime(2021, 8, 28), new DateTime(2021, 4, 15));
+            TestDatePair(new DateTime(2021, 8, 28), new DateTime(2021, 2, 15));
+            TestDatePair(new DateTime(2021, 1, 28), new DateTime(2021, 2, 15));
+            TestDatePair(new DateTime(2021, 1, 28), new DateTime(2021, 4, 15));
         }
 
         [TestMethod]
         public void AllowedDowPartValueIsAllowedThisLeapYear_Tests()
         {
-            AllowedDateTimePart t;
-            DateTime base_date;
-            int[] parts;
-            base_date = new DateTime(2021, 8, 28);
-            t = new AllowedDowPart(TestUtils.MakeBoolMap(new int[] { 3 }, PartConsts.FIRST_DOW, PartConsts.LAST_DOW), base_date);
-            parts = TestUtils.MakeValueParts(new Tuple<int, int>[] {
-                new Tuple<int,int>(PartConsts.DAYS,15),
-                new Tuple<int, int>(PartConsts.MONTHS, 4),
-                new Tuple<int, int>(PartConsts.YEARS, 2020)
-            });
-            Assert.IsTrue(t.ValueIsAllowed(parts));
-            parts[PartConsts.DAYS] = 16;
-            Assert.IsFalse(t.ValueIsAllowed(parts));
-            t = new AllowedDowPart(TestUtils.MakeBoolMap(new int[] { 6 }, PartConsts.FIRST_DOW, PartConsts.LAST_DOW), base_date);
-            parts = TestUtils.MakeValueParts(new Tuple<int, int>[] {
-                new Tuple<int,int>(PartConsts.DAYS,15),
-                new Tuple<int, int>(PartConsts.MONTHS, 2),
-                new Tuple<int, int>(PartConsts.YEARS, 2020)
-            });
-            Assert.IsTrue(t.ValueIsAllowed(parts));
-            parts[PartConsts.DAYS] = 16;
-            Assert.IsFalse(t.ValueIsAllowed(parts));
+            TestDatePair(new DateTime(2020, 8, 28), new DateTime(2020, 4, 15));
+            TestDatePair(new DateTime(2020, 8, 28), new DateTime(2020, 2, 15));
+            TestDatePair(new DateTime(2020, 1, 28), new DateTime(2020, 2, 15));
+            TestDatePair(new DateTime(2020, 1, 28), new DateTime(2020, 4, 15));
+        }
 
-            base_date = new DateTime(2020, 1, 28);
-            t = new AllowedDowPart(TestUtils.MakeBoolMap(new int[] { 6 }, PartConsts.FIRST_DOW, PartConsts.LAST_DOW), base_date);
-            parts = TestUtils.MakeValueParts(new Tuple<int, int>[] {
-                new Tuple<int,int>(PartConsts.DAYS,15),
-                new Tuple<int, int>(PartConsts.MONTHS, 2),
-                new Tuple<int, int>(PartConsts.YEARS, 2020)
-            });
-            Assert.IsTrue(t.ValueIsAllowed(parts));
-            parts[PartConsts.DAYS] = 16;
-            Assert.IsFalse(t.ValueIsAllowed(parts));
 
-            t = new AllowedDowPart(TestUtils.MakeBoolMap(new int[] { 3 }, PartConsts.FIRST_DOW, PartConsts.LAST_DOW), base_date);
-            parts = TestUtils.MakeValueParts(new Tuple<int, int>[] {
-                new Tuple<int,int>(PartConsts.DAYS,15),
-                new Tuple<int, int>(PartConsts.MONTHS, 4),
-                new Tuple<int, int>(PartConsts.YEARS, 2020)
-            });
-            Assert.IsTrue(t.ValueIsAllowed(parts));
-            parts[PartConsts.DAYS] = 16;
-            Assert.IsFalse(t.ValueIsAllowed(parts));
+        [TestMethod]
+        public void AllowedDowPartValueIsAllowedANumberofYears_Tests()
+        {
+            TestDatePair(new DateTime(2020,4,15), new DateTime(2021, 2, 21));  //4.2020<->2.2021
+            TestDatePair(new DateTime(2020, 4, 15), new DateTime(2021, 8, 21));  //4.2020<->8.2021
+            TestDatePair(new DateTime(2020, 2, 15), new DateTime(2021, 8, 21));  //2.2020<->8.2021
+            TestDatePair(new DateTime(2019, 8, 7), new DateTime(2020, 2, 21));  //8.2019<->2.2020
+            TestDatePair(new DateTime(2019, 8, 7), new DateTime(2020, 4, 21));  //8.2019<->4.2020
+            TestDatePair(new DateTime(2016, 4, 27), new DateTime(2020, 2, 20));  //4.2016<->2.2020
+            TestDatePair(new DateTime(2016, 2, 27), new DateTime(2020, 2, 20));  //2.2016<->2.2020
+            TestDatePair(new DateTime(2016, 2, 27), new DateTime(2020, 4, 20));  //2.2016<->4.2020
+            TestDatePair(new DateTime(2016, 4, 27), new DateTime(2020, 2, 20));  //4.2016<->2.2020
+            TestDatePair(new DateTime(2016, 4, 27), new DateTime(2020, 3, 20));  //4.2016<->3.2020
+            TestDatePair(new DateTime(2015, 8, 22), new DateTime(2021, 4, 15));  //8.2015<->4.2021
         }
 
         [TestMethod]
