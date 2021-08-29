@@ -49,6 +49,7 @@ namespace Test
             {
                 //The minimal allowed day is 29th. We could come here only if February is the only allowed month
                 //Should check for any leap year is allowed
+                if (AllowedLists[PartConsts.YEARS] == null) return true;
                 for (int year = PartConsts.FIRST_YEAR; year <= PartConsts.LAST_YEAR; year++)
                     if (AllowedLists[PartConsts.YEARS][year - PartConsts.FIRST_YEAR] && PartConsts.IsLeapYear(year))
                         return true; //Allowed leap year found, so "29th February only" is a valid schedule

@@ -75,7 +75,7 @@ namespace ScheduleLibrary.Test
 
         const string _dateTests = "01.02.2021|10-13.10-11.2020-2021|1,12,21.8,11.2013,2020|*.*.*|5-20/5.*/4.2011-2021/2"+
             "|31.06.2022|31.6-10/4.2021|31.*.2012|31.2-6/2.2020|29-31.02.2021-2029/4|29-30.02.2021-2025|29-32.02.2021"+
-            "|0.10.2021|10.13.2021|12.04.1961|11.02|11||.11.2024|01..2024|05.12.|a.11.2024|01.b.2024|05.12.c|*.b.2024|05.*.c";
+            "|0.10.2021|10.13.2021|12.04.1961|11.02|11||.11.2024|01..2024|05.12.|a.11.2024|01.b.2024|05.12.c|*.b.2024|05.*.c|29-31.02.*";
         int[] _dateParts = new int[] { PartConsts.YEARS, PartConsts.MONTHS, PartConsts.DAYS };
 
         [TestMethod]
@@ -110,6 +110,7 @@ namespace ScheduleLibrary.Test
             Assert.IsTrue(parser.Recognize(t[23])); //"05.12.c"
             Assert.IsTrue(parser.Recognize(t[24])); //"*.b.2024"
             Assert.IsTrue(parser.Recognize(t[25])); //"05.*.c"
+            Assert.IsTrue(parser.Recognize(t[26])); //"29-31.02.*"
         }
         [TestMethod]
         public void DatePartParser_ParseTest()
@@ -205,6 +206,12 @@ namespace ScheduleLibrary.Test
             Assert.IsFalse(parser.Parse(t[24], ref AllowedLists)); //"*.b.2024"
             Clear();
             Assert.IsFalse(parser.Parse(t[25], ref AllowedLists)); //"05.*.c"
+            Clear();
+            Assert.IsTrue(parser.Parse(t[26], ref AllowedLists)); //"29-31.02.*"
+            Assert.IsTrue(TestUtils.CheckMapAbsence(_dateParts, AllowedLists));
+            Assert.IsTrue(TestUtils.CheckBoolMap(new int[] { 29, 30, 31 }, AllowedLists[PartConsts.DAYS], PartConsts.FIRST_DAY_IN_MONTH, PartConsts.LAST_DAY_IN_MONTH));
+            Assert.IsTrue(TestUtils.CheckBoolMap(new int[] { 2 }, AllowedLists[PartConsts.MONTHS], PartConsts.FIRST_MONTH, PartConsts.LAST_MONTH));
+            Assert.IsTrue(TestUtils.CheckBoolMap(null, AllowedLists[PartConsts.YEARS], PartConsts.FIRST_YEAR, PartConsts.LAST_YEAR));
         }
 
         const string _timeTests = "17:20:03|17:20:03.525|0,23:0,59:0,59.0,999|24:03:20.525|17:60:20.525|17:03:60.525|17:03:20.1000|*:*:*.*|*:*:*"
