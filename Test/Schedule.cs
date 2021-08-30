@@ -130,13 +130,17 @@ namespace Test
 
 		internal bool StepToNearestEvent(bool ToNext, ref int[] ValueParts)
         {
-			bool step_made;
-			int part_number = PartConsts.NUM_PARTS - 1;
-			bool still_valid = true;
-			bool no_wrap = true;
+			bool step_made; //Flag to show successfull 
+			int part_number = PartConsts.NUM_PARTS - 1; //Part number of the date/time under processing (stepping/validating/wrapping)
+			bool still_valid = true; //Flag for performing initial validation of upper-level ValueParts (only on the first pass of the outer do cycle)
+			bool no_wrap; //Flag showing that no wrap on the current stage occured (but see also a comment at the start of the outer loop)
 			do
-			{ 
-				do {
+			{
+				no_wrap = still_valid; //A trick to force running AllowedDateTimePart.StepValue from the beginning of the inner do cycle
+									   // of the second and subsequent outer do cycle pass if the check-only (day of week) test fails
+									   // or else it goes on the same way as in the first outer do cycle pass and begons with AllowedDateTimePart.Wrap
+				do
+				{
 					//Process validation (initial) and making step to the next/prev event
 					if (!ScheduleParts[part_number].IsCheckOnly) //Check-only steps are always skipped here
 					{
@@ -144,7 +148,7 @@ namespace Test
 						{
 							if (still_valid) 
 								//Should continue validation from upper parts 
-								//if it's not the first part (for which a step is required)
+								//if it's not the first (lowest) part? for which a step but not validation is always required
 								still_valid = part_number>0 && ScheduleParts[part_number].ValueIsAllowed(ValueParts);
 							if (!still_valid) 
 								//Validation of this or some upper parts (including check-only ones on previous run of the outer do-while cycle) failed 
@@ -157,7 +161,7 @@ namespace Test
 					if (no_wrap) part_number--; else part_number++; //Change part_number accordingly of wheather we need perform step on the upper part
 				} while (part_number >= 0 && part_number < PartConsts.NUM_PARTS); 
 				//Come here if we complete making a step or determined that we could not complete it (no more events)
-				step_made = part_number < PartConsts.NUM_PARTS;
+				step_made = no_wrap; 
 				if (step_made)//Step is completed and all parts where the step is possible (i.e. non-checkonly) are valid here 
 					//Validate check-only parts now
 					for (part_number = 0; part_number < PartConsts.NUM_PARTS; part_number++) {
@@ -169,10 +173,11 @@ namespace Test
 								//Restart making the step from the first part, from which this composite part is dependent
 								part_number = ScheduleParts[part_number].MinimalDependentPart; //Reset the current part number
 								step_made = false;
+								break;
 							}
 						}
 					}
-			} while (!step_made);
+			} while (!step_made && no_wrap);
 			return step_made;
         }
 
