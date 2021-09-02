@@ -59,18 +59,18 @@ namespace Test
         {
             return new AllowedDateTimePart(MinAllowed, MaxAllowed, AllowedList, PartNumber);
         }
-        protected bool ValueIsAllowed(int Value, int[] ValueParts) {
+        protected bool ValueIsAllowed(int Value, ref Span<int> ValueParts) {
             if (AllAllowed) return true;
             return _allowedValues[Value-_minAllowed]; 
         }
 
-        public virtual bool ValueIsAllowed(int[] ValueParts)
+        public virtual bool ValueIsAllowed(ref Span<int> ValueParts)
         {
             if (AllAllowed) return true;
             return _allowedValues[ValueParts[PartNumber] - _minAllowed];
         }
 
-        public virtual bool StepValue(bool ToNext, int[] ValueParts)
+        public virtual bool StepValue(bool ToNext, ref Span<int> ValueParts)
         {
             int Value=ValueParts[PartNumber];
             //Search for the next allowed value forward/back
@@ -83,7 +83,7 @@ namespace Test
             return result.HasValue;
         }
 
-        public virtual bool Wrap(bool ToNext, int[] ValueParts)
+        public virtual bool Wrap(bool ToNext, ref Span<int> ValueParts)
         {
             ValueParts[PartNumber] = ToNext ? FirstAllowedValue: LastAllowedValue;
             return true;//The allowed value always exists (it was checked during schedule string parsing)

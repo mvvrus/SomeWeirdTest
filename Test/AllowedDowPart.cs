@@ -31,7 +31,7 @@ namespace Test
             return new AllowedDowPart(AllowedList);
         }
 
-        int NumFebs29InRange(int[] ValueParts, bool CountBack)
+        int NumFebs29InRange(in Span<int> ValueParts, bool CountBack)
         {
             int first_year, last_year; //Range of years to search for leap ones
 
@@ -55,13 +55,13 @@ namespace Test
             return result;
         }
 
-        public override bool ValueIsAllowed(int[] ValueParts)
+        public override bool ValueIsAllowed(ref Span<int> ValueParts)
         {
             //Has side effect! Computes and sets ValueParts[DOW] value.
             bool count_back = _startYear > ValueParts[PartConsts.YEARS] ||
                 (_startYear == ValueParts[PartConsts.YEARS] && ((_startMonth > ValueParts[PartConsts.MONTHS])
                 || _startMonth == ValueParts[PartConsts.MONTHS] && _startDay > ValueParts[PartConsts.DAYS]));
-            int feb29_count = NumFebs29InRange (ValueParts, count_back);
+            int feb29_count = NumFebs29InRange (in ValueParts, count_back);
 
             int days_passed,month_days_passed;
             int month_int_start=_startMonth, month_int_end=ValueParts[PartConsts.MONTHS];
@@ -82,7 +82,7 @@ namespace Test
             int dow = (_startDow + days_passed) % PartConsts.DAYS_IN_WEEK;
             if (dow < 0) dow = PartConsts.DAYS_IN_WEEK + dow;
             ValueParts[PartNumber] = dow;
-            return base.ValueIsAllowed(dow, ValueParts);
+            return base.ValueIsAllowed(dow, ref ValueParts);
         }
 
         private int DaysInMonthsPassedNonLeap(int MonthIntervalStart, int MonthIntervalEnd)
@@ -94,12 +94,12 @@ namespace Test
             return result;
         }
 
-        public override bool StepValue(bool ToNext, int[] ValueParts)
+        public override bool StepValue(bool ToNext, ref Span<int> ValueParts)
         {
             throw new NotImplementedException(); //Should not ever be called
         }
 
-        public override bool Wrap(bool ToNext, int[] ValueParts)
+        public override bool Wrap(bool ToNext, ref Span<int> ValueParts)
         {
             throw new NotImplementedException(); //Should not ever be called
         }

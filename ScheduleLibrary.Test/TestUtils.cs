@@ -37,9 +37,9 @@ namespace ScheduleLibrary.Test
             return result;
         }
 
-        static public int[] MakeValueParts(int Part, int Value)
+        static public Span<int> MakeValueParts(int Part, int Value)
         {
-            int[] result = new int[PartConsts.NUM_PARTS];
+            Span<int> result = new int[PartConsts.NUM_PARTS];
             result[Part] = Value;
             return result;
         }

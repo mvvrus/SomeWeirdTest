@@ -12,7 +12,7 @@ namespace ScheduleLibrary.Test
         {
             AllowedDateTimePart t;
             DateTime base_date;
-            int[] parts;
+            Span<int> parts;
             base_date = new DateTime(2021, 8, 28);
             t = new AllowedDowPart(TestUtils.MakeBoolMap(null, PartConsts.FIRST_DOW, PartConsts.LAST_DOW), base_date);
             parts = TestUtils.MakeValueParts(new Tuple<int, int>[] {
@@ -20,19 +20,19 @@ namespace ScheduleLibrary.Test
                 new Tuple<int, int>(PartConsts.MONTHS, base_date.Month),
                 new Tuple<int, int>(PartConsts.YEARS, base_date.Year)
             });
-            Assert.IsTrue(t.ValueIsAllowed(parts));
+            Assert.IsTrue(t.ValueIsAllowed(ref parts));
             t = new AllowedDowPart(TestUtils.MakeBoolMap(new int[] { (int)base_date.DayOfWeek }, PartConsts.FIRST_DOW, PartConsts.LAST_DOW), base_date);
-            Assert.IsTrue(t.ValueIsAllowed(parts));
+            Assert.IsTrue(t.ValueIsAllowed(ref parts));
             t = new AllowedDowPart(TestUtils.MakeBoolMap(new int[] { ((int)base_date.DayOfWeek + 1) % (PartConsts.LAST_DOW - PartConsts.FIRST_DOW + 1) },
                 PartConsts.FIRST_DOW, PartConsts.LAST_DOW), base_date);
-            Assert.IsFalse(t.ValueIsAllowed(parts));
+            Assert.IsFalse(t.ValueIsAllowed(ref parts));
         }
 
         void TestDatePairUnidir(DateTime DateBase, DateTime DateTest)
         {
             AllowedDateTimePart t;
             DateTime base_date;
-            int[] parts;
+            Span<int> parts;
             base_date = DateBase;
             t = new AllowedDowPart(TestUtils.MakeBoolMap(new int[] { (int)DateTest.DayOfWeek }, PartConsts.FIRST_DOW, PartConsts.LAST_DOW), base_date);
             parts = TestUtils.MakeValueParts(new Tuple<int, int>[] {
@@ -40,14 +40,14 @@ namespace ScheduleLibrary.Test
                 new Tuple<int, int>(PartConsts.MONTHS, DateTest.Month),
                 new Tuple<int, int>(PartConsts.YEARS, DateTest.Year)
             });
-            Assert.IsTrue(t.ValueIsAllowed(parts));
+            Assert.IsTrue(t.ValueIsAllowed(ref parts));
             DateTime DateTest2 = DateTest.AddDays(1);
             parts = TestUtils.MakeValueParts(new Tuple<int, int>[] {
                 new Tuple<int,int>(PartConsts.DAYS,DateTest2.Day),
                 new Tuple<int, int>(PartConsts.MONTHS, DateTest2.Month),
                 new Tuple<int, int>(PartConsts.YEARS, DateTest2.Year)
             });
-            Assert.IsFalse(t.ValueIsAllowed(parts));
+            Assert.IsFalse(t.ValueIsAllowed(ref parts));
         }
 
         void TestDatePair(DateTime Date1, DateTime Date2)
@@ -110,7 +110,13 @@ namespace ScheduleLibrary.Test
         {
             AllowedDateTimePart t;
             t = AllowedDowPart.CreateDateTimePart(TestUtils.MakeBoolMap(null, PartConsts.FIRST_DOW, PartConsts.LAST_DOW));
-            Assert.ThrowsException<NotImplementedException>(() => t.StepValue(true, TestUtils.MakeValueParts(PartConsts.DOW, 1)));
+            Assert.ThrowsException<NotImplementedException>(StepValue);
+
+            void StepValue()
+            {
+                Span<int> parts = TestUtils.MakeValueParts(PartConsts.DOW, 1);
+                t.StepValue(true, ref parts);
+            }
         }
 
         [TestMethod]
@@ -118,7 +124,13 @@ namespace ScheduleLibrary.Test
         {
             AllowedDateTimePart t;
             t = AllowedDowPart.CreateDateTimePart(TestUtils.MakeBoolMap(null, PartConsts.FIRST_DOW, PartConsts.LAST_DOW));
-            Assert.ThrowsException<NotImplementedException>(() => t.Wrap(true, TestUtils.MakeValueParts(PartConsts.DOW, 1)));
+            Assert.ThrowsException<NotImplementedException>(Wrap);
+
+            void Wrap()
+            {
+                Span<int> parts = TestUtils.MakeValueParts(PartConsts.DOW, 1);
+                t.StepValue(true, ref parts);
+            }
         }
 
         [TestMethod]

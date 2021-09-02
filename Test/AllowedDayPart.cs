@@ -25,20 +25,20 @@ namespace Test
         }
 
 
-        public override bool ValueIsAllowed(int[] ValueParts)
+        public override bool ValueIsAllowed(ref Span<int> ValueParts)
         {
             int Value = ValueParts[PartNumber];
             int current_month = ValueParts[PartConsts.MONTHS];
             bool leap_year = PartConsts.IsLeapYear(ValueParts[PartConsts.YEARS]);
-            return base.ValueIsAllowed(Value,ValueParts) && Value<=GetMaxAllowed(current_month,leap_year) || 
-                Value== this.GetMaxAllowed(current_month, leap_year) && base.ValueIsAllowed(PartConsts.LAST_DAY_IN_MONTH, ValueParts);
+            return base.ValueIsAllowed(Value,ref ValueParts) && Value<=GetMaxAllowed(current_month,leap_year) || 
+                Value== this.GetMaxAllowed(current_month, leap_year) && base.ValueIsAllowed(PartConsts.LAST_DAY_IN_MONTH, ref ValueParts);
         }
         
-        public override bool StepValue(bool ToNext, int[] ValueParts)
+        public override bool StepValue(bool ToNext, ref Span<int> ValueParts)
         {
             int Value = ValueParts[PartNumber];
             int day_from = Value; //Save value from which we start for check if the last day in month is allowed
-            bool NoWrap = base.StepValue(ToNext, ValueParts);
+            bool NoWrap = base.StepValue(ToNext, ref ValueParts);
             Value = ValueParts[PartNumber];
             int current_month = ValueParts[PartConsts.MONTHS];
             bool leap_year = PartConsts.IsLeapYear(ValueParts[PartConsts.YEARS]);
@@ -66,9 +66,9 @@ namespace Test
             return NoWrap;
         }
 
-        public override bool Wrap(bool ToNext, int[] ValueParts)
+        public override bool Wrap(bool ToNext, ref Span<int> ValueParts)
         {
-            bool NoWrapMore = base.Wrap(ToNext, ValueParts);
+            bool NoWrapMore = base.Wrap(ToNext, ref ValueParts);
             //The allowed day in this month may not exist, if all allowed days fall beyond the end of the month
             int current_month = ValueParts[PartConsts.MONTHS];
             bool leap_year = PartConsts.IsLeapYear(ValueParts[PartConsts.YEARS]);

@@ -83,7 +83,7 @@ namespace Test
 				ScheduleParts[i] = SchedulePartCreators[i](AllowedLists[i]);
 		}
 
-		void SplitDateTimeToParts(DateTime Value, int[] ValueParts)
+		void SplitDateTimeToParts(DateTime Value, ref Span<int> ValueParts)
 		{
 			ValueParts[PartConsts.MSECS] = Value.Millisecond;
 			ValueParts[PartConsts.SECS] = Value.Second;
@@ -95,7 +95,7 @@ namespace Test
 			ValueParts[PartConsts.YEARS] = Value.Year;
 		}
 
-		DateTime JoinDateTimeFromParts(int[] ValueParts) {
+		DateTime JoinDateTimeFromParts(in Span<int> ValueParts) {
 			return new DateTime(ValueParts[PartConsts.YEARS],
 				ValueParts[PartConsts.MONTHS],
 				ValueParts[PartConsts.DAYS],
@@ -118,17 +118,17 @@ namespace Test
 			//Do nothing
 		}
 
-		internal Boolean CheckCurrentEvent(int[] ValueParts)
+		internal Boolean CheckCurrentEvent(ref Span<int> ValueParts)
 		{
 			for (int i = 0; i < PartConsts.NUM_PARTS; i++)
 			{
 				
-				if (!ScheduleParts[i].ValueIsAllowed(ValueParts)) return false;
+				if (!ScheduleParts[i].ValueIsAllowed(ref ValueParts)) return false;
 			}
 			return true;
 		}
 
-		internal bool StepToNearestEvent(bool ToNext, ref int[] ValueParts)
+		internal bool StepToNearestEvent(bool ToNext, ref Span<int> ValueParts)
         {
 			bool step_made; //Flag to show successfull 
 			int part_number = PartConsts.NUM_PARTS - 1; //Part number of the date/time under processing (stepping/validating/wrapping)
@@ -149,14 +149,14 @@ namespace Test
 							if (still_valid) 
 								//Should continue validation from upper parts 
 								//if it's not the first (lowest) part? for which a step but not validation is always required
-								still_valid = part_number>0 && ScheduleParts[part_number].ValueIsAllowed(ValueParts);
+								still_valid = part_number>0 && ScheduleParts[part_number].ValueIsAllowed(ref ValueParts);
 							if (!still_valid) 
 								//Validation of this or some upper parts (including check-only ones on previous run of the outer do-while cycle) failed 
 								//or it's a first_step
-								no_wrap= ScheduleParts[part_number].StepValue(ToNext, ValueParts);
+								no_wrap= ScheduleParts[part_number].StepValue(ToNext, ref ValueParts);
 						}
 						else //A step to next/prev value somewhere in the upper part processing occured.
-							no_wrap = ScheduleParts[part_number].Wrap(ToNext, ValueParts);
+							no_wrap = ScheduleParts[part_number].Wrap(ToNext, ref ValueParts);
 					}
 					if (no_wrap) part_number--; else part_number++; //Change part_number accordingly of wheather we need perform step on the upper part
 				} while (part_number >= 0 && part_number < PartConsts.NUM_PARTS); 
@@ -167,7 +167,7 @@ namespace Test
 					for (part_number = 0; part_number < PartConsts.NUM_PARTS; part_number++) {
 						if(ScheduleParts[part_number].IsCheckOnly)
                         {
-							if (!ScheduleParts[part_number].ValueIsAllowed(ValueParts))
+							if (!ScheduleParts[part_number].ValueIsAllowed(ref ValueParts))
                             {
 								//Validity of this part was violated (it's possible for composite part, like DayOfWeek, checks).
 								//Restart making the step from the first part, from which this composite part is dependent
@@ -183,77 +183,49 @@ namespace Test
 
 		public DateTime NearestEvent(DateTime t1)
 		{
-			int[] daytime_parts = AcquirePartsArray();
+			Span<int> daytime_parts = stackalloc int[PartConsts.NUM_PARTS];
 			DateTime result;
-            try
+			SplitDateTimeToParts(t1, ref daytime_parts);
+			if (CheckCurrentEvent(ref daytime_parts)) result=t1;
+			else
             {
-				SplitDateTimeToParts(t1, daytime_parts);
-				if (CheckCurrentEvent(daytime_parts)) result=t1;
-				else
-                {
-					if(!StepToNearestEvent(true, ref daytime_parts)) throw new NoMoreEventsException();
-					result = JoinDateTimeFromParts(daytime_parts);
-                }
-			}
-			finally
-            {
-				ReleasePartsArray(daytime_parts);
+				if(!StepToNearestEvent(true, ref daytime_parts)) throw new NoMoreEventsException();
+				result = JoinDateTimeFromParts(in daytime_parts);
             }
 			return result;
 		}
 
 		public DateTime NearestPrevEvent(DateTime t1)
 		{
-			int[] daytime_parts = AcquirePartsArray();
+			Span<int> daytime_parts = stackalloc int[PartConsts.NUM_PARTS];
 			DateTime result;
-			try
+			SplitDateTimeToParts(t1, ref daytime_parts);
+			if (CheckCurrentEvent(ref daytime_parts)) result = t1;
+			else
 			{
-				SplitDateTimeToParts(t1, daytime_parts);
-				if (CheckCurrentEvent(daytime_parts)) result = t1;
-				else
-				{
-					if (!StepToNearestEvent(false, ref daytime_parts)) throw new NoMoreEventsException();
-					result = JoinDateTimeFromParts(daytime_parts);
-				}
-			}
-			finally
-			{
-				ReleasePartsArray(daytime_parts);
+				if (!StepToNearestEvent(false, ref daytime_parts)) throw new NoMoreEventsException();
+				result = JoinDateTimeFromParts(in daytime_parts);
 			}
 			return result;
 		}
 
 		public DateTime NextEvent(DateTime t1)
 		{
-			int[] daytime_parts = AcquirePartsArray();
+			Span<int> daytime_parts = stackalloc int[PartConsts.NUM_PARTS];
 			DateTime result;
-			try
-			{
-				SplitDateTimeToParts(t1, daytime_parts);
-				if (!StepToNearestEvent(true, ref daytime_parts)) throw new NoMoreEventsException();
-				result = JoinDateTimeFromParts(daytime_parts);
-			}
-			finally
-			{
-				ReleasePartsArray(daytime_parts);
-			}
+			SplitDateTimeToParts(t1, ref daytime_parts);
+			if (!StepToNearestEvent(true, ref daytime_parts)) throw new NoMoreEventsException();
+			result = JoinDateTimeFromParts(in daytime_parts);
 			return result;
 		}
 
 		public DateTime PrevEvent(DateTime t1)
 		{
-			int[] daytime_parts = AcquirePartsArray();
+			Span<int> daytime_parts = stackalloc int[PartConsts.NUM_PARTS];
 			DateTime result;
-			try
-			{
-				SplitDateTimeToParts(t1, daytime_parts);
-				if (!StepToNearestEvent(false, ref daytime_parts)) throw new NoMoreEventsException();
-				result = JoinDateTimeFromParts(daytime_parts);
-			}
-			finally
-			{
-				ReleasePartsArray(daytime_parts);
-			}
+			SplitDateTimeToParts(t1, ref daytime_parts);
+			if (!StepToNearestEvent(false, ref daytime_parts)) throw new NoMoreEventsException();
+			result = JoinDateTimeFromParts(in daytime_parts);
 			return result;
 		}
 	}

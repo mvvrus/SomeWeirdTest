@@ -41,7 +41,7 @@ namespace Test
             }
         }
 
-        public override bool StepValue(bool ToNext, int[] ValueParts)
+        public override bool StepValue(bool ToNext, ref Span<int> ValueParts)
         {
             //The implementation of this method (searcing for next/previsous valid value)
             //is optimized the following way. The method does not perform a linear scan of the whole map
