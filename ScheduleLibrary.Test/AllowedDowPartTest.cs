@@ -102,7 +102,7 @@ namespace ScheduleLibrary.Test
         {
             AllowedDateTimePart t;
             t = AllowedDowPart.CreateDateTimePart(TestUtils.MakeBoolMap(null, PartConsts.FIRST_DOW, PartConsts.LAST_DOW));
-            Assert.IsTrue(t.IsCheckOnly);
+            Assert.IsTrue(t.IsDependent);
         }
 
         [TestMethod]

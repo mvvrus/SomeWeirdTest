@@ -89,7 +89,7 @@ namespace Test
             return true;//The allowed value always exists (it was checked during schedule string parsing)
         }
 
-        public virtual bool IsCheckOnly { get { return false; } }
+        public virtual bool IsDependent { get { return false; } }
         public virtual int MinimalDependentPart { get { return 0; } }
     }
 

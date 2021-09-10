@@ -432,7 +432,7 @@ namespace ScheduleLibrary.Test
         {
             AllowedDateTimePart t;
             t = AllowedDayPart.CreateDateTimePart(TestUtils.MakeBoolMap(null, PartConsts.FIRST_DAY_IN_MONTH, PartConsts.LAST_DAY_IN_MONTH));
-            Assert.IsFalse(t.IsCheckOnly);
+            Assert.IsFalse(t.IsDependent);
         }
     }
 }
