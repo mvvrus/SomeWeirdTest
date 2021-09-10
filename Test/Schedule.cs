@@ -142,7 +142,7 @@ namespace Test
 				do
 				{
 					//Process validation (initial) and making step to the next/prev event
-					if (!ScheduleParts[part_number].IsCheckOnly) //Check-only steps are always skipped here
+					if (!ScheduleParts[part_number].IsDependent) //Check-only steps are always skipped here
 					{
 						if (still_valid || !no_wrap) //Need make validation and/or step
 						{
@@ -165,7 +165,7 @@ namespace Test
 				if (step_made)//Step is completed and all parts where the step is possible (i.e. non-checkonly) are valid here 
 					//Validate check-only parts now
 					for (part_number = 0; part_number < PartConsts.NUM_PARTS; part_number++) {
-						if(ScheduleParts[part_number].IsCheckOnly)
+						if(ScheduleParts[part_number].IsDependent)
                         {
 							if (!ScheduleParts[part_number].ValueIsAllowed(ref ValueParts))
                             {

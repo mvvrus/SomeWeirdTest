@@ -24,7 +24,7 @@ namespace Test
         }
 
 
-        public override bool IsCheckOnly { get { return true; } }
+        public override bool IsDependent { get { return true; } }
 
         public static AllowedDateTimePart CreateDateTimePart(bool[] AllowedList)
         {
