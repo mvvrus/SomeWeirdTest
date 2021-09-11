@@ -124,4 +124,11 @@
     <Error Condition="!Exists('..\packages\MSTest.TestAdapter.2.1.1\build\net45\MSTest.TestAdapter.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSTest.TestAdapter.2.1.1\build\net45\MSTest.TestAdapter.targets'))" />
   </Target>
   <Import Project="..\packages\MSTest.TestAdapter.2.1.1\build\net45\MSTest.TestAdapter.targets" Condition="Exists('..\packages\MSTest.TestAdapter.2.1.1\build\net45\MSTest.TestAdapter.targets')" />
+  <Target Name="BeforeBuild">
+	<Delete Files="$(MSBuildProjectExtensionsPath)project.assets.json" TreatErrorsAsWarnings="true" />
+    <Delete Files="$(MSBuildProjectExtensionsPath)$(ProjectFileName).nuget.g.props"  TreatErrorsAsWarnings="true" />
+  </Target>
+	<PropertyGroup Condition="Exists('$(MSBuildProjectExtensionsPath)$(ProjectFileName).nuget.g.props')">
+		<OutputType>Library</OutputType>
+	</PropertyGroup>
 </Project>

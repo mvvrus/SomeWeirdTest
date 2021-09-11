@@ -66,4 +66,7 @@
     <Content Include="Schedule.cs.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="BeforeBuild">
+	<Delete Files="$(MSBuildProjectExtensionsPath)project.assets.json" TreatErrorsAsWarnings="true" />
+  </Target>
 </Project>
