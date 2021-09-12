@@ -34,15 +34,21 @@ namespace Test
                     for (int j = 0; j < _maps[i].Length; j++)
                     {
                         _maps[i][j] = false;
-                        for (int k = 0; k < Math.Min(_scales[i], prev_map.Length - j * _scales[i]) && _maps[i][j]; k++)
+                        for (int k = 0; k < Math.Min(_scales[i], prev_map.Length - j * _scales[i]) && !_maps[i][j]; k++)
                             if (prev_map[j * _scales[i] + k]) _maps[i][j] = true;
                     }
+                    prev_map = _maps[i];
                 }
             }
         }
 
+        public static AllowedDateTimePart CreateDateTimePart(int MinAllowed, int MaxAllowed, bool[] AllowedList, int PartNumber, int[] Scales)
+        {
+            return new AllowedDateTimePartMapped(MinAllowed, MaxAllowed, AllowedList, PartNumber, Scales);
+        }
         public override bool StepValue(bool ToNext, ref Span<int> ValueParts)
         {
+            if (_scales == null) return base.StepValue(ToNext, ref ValueParts); //If any value allowed, the base implementation is good enough
             //The implementation of this method (searcing for next/previsous valid value)
             //is optimized the following way. The method does not perform a linear scan of the whole map
             //but tries to find the valid value within a block of values, presented by one upper-level map
@@ -56,10 +62,12 @@ namespace Test
             int map_no=-1; //Level of a map we are searching in (-1 - full map of the ancestor class, otherwise - index of block map to search in)
             int? value_tocome; //Result of search performed
             do  { //Perform search on all required levels
-                //Determine the block boundary in the search direction (becoming the whole map boundary if we are search in to-level map)
+                int block_size = 0;
+                //Determine the block boundary in the search direction (becoming the whole map boundary if we are to search in the top-level map)
                 if (map_no + 1 < _scales.Length) {
-                    map_limit = (cur_value / _scales[map_no + 1]) * _scales[map_no + 1] + (ToNext ? _scales[map_no+1] : -1);
-                    //Correct block limit to avoid reading beyond the map
+                    block_size = _scales[map_no + 1]; //Size of block of map to search
+                    map_limit = (cur_value / block_size) * block_size + (ToNext ? block_size : -1); //Set appropriate (upper/lower) limit of search
+                    //Correct search limit to avoid reading beyond the map
                     map_limit = Math.Min(map_limit, map_no<0? _baseMapLength : _maps[map_no].Length); 
                 }
                 else map_limit = ToNext ? _maps[map_no].Length : -1;
@@ -69,8 +77,8 @@ namespace Test
                     FindNextPrevValue(cur_value, map_limit, _maps[map_no], 0); //Search in the block map
                 if (value_tocome.HasValue) break; //Valid value/block found in the required direction at this level. No need to search upper level map
                 //Prepare to search ove level upper (if it exists)
-                if(map_no < _maps.Length) cur_value = cur_value / _scales[map_no + 1]; //Scale the 
-                map_no++;
+                if(map_no+1 < _maps.Length) cur_value = cur_value / block_size; //Scale the cur_value if at least one serch to be performed
+                map_no++; //Increment map number
             } while (map_no<_maps.Length);
             //See if valid value/block with valid value found on some level 
             if(!value_tocome.HasValue)  {
@@ -80,11 +88,12 @@ namespace Test
                 return false;
             }
             //Come here if valid value/block with valid value was found on some level 
+            cur_value = value_tocome.Value;
             while (map_no >= 0) { //We have found not value itself but a block of the upper level, containing it
                 //Search at the lower level to find valid value or block of the lower level, containing it
                 //in the case of block, not the value, decrease level an continue search on the level below
-                map_limit = cur_value * _scales[map_no]+(ToNext ? -1 : _scales[map_no]); //Compute the block boundary for the lower level map
-                cur_value = cur_value * _scales[map_no]+(ToNext?0:_scales[map_no]-1); //Compute a start value to search on the lower level
+                map_limit = cur_value * _scales[map_no]+(ToNext ?  _scales[map_no] : -1); //Compute the block boundary for the lower level map
+                cur_value = cur_value * _scales[map_no]+(ToNext?-1:_scales[map_no]); //Compute a start value to search on the lower level
                 map_no--; //Come one level lower to perform search on it
                 //Correct block limit to avoid possible reading beyond the map
                 map_limit = Math.Min(map_limit, map_no<0?_baseMapLength:_maps[map_no].Length); 

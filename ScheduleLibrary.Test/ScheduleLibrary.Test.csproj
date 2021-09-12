@@ -22,6 +22,9 @@
 	  <Compile Include="..\Test\AllowedDowPart.cs">
 		  <Link>AllowedDowPart.cs</Link>
 	  </Compile>
+	  <Compile Include="..\Test\AllowedDateTimePartMapped.cs">
+		  <Link>AllowedDateTimePartMapped.cs</Link>
+	  </Compile>
 	  <Compile Include="..\Test\AnyParser.cs">
 		  <Link>AnyParser.cs</Link>
 	  </Compile>
