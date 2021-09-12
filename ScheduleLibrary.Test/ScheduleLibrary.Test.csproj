@@ -52,6 +52,9 @@
     <Compile Include="..\Test\AllowedDateTimePart.cs">
       <Link>AllowedDateTimePart.cs</Link>
     </Compile>
+    <Compile Include="..\Test\AllowedDateTimePartMapped.cs">
+      <Link>AllowedDateTimePartMapped.cs</Link>
+    </Compile>
     <Compile Include="..\Test\AllowedDayPart.cs">
       <Link>AllowedDayPart.cs</Link>
     </Compile>
@@ -100,6 +103,7 @@
     <Compile Include="..\Test\TwoDelimParser.cs">
       <Link>TwoDelimParser.cs</Link>
     </Compile>
+    <Compile Include="AllowedDateTimePartMappedTests.cs" />
     <Compile Include="AllowedDateTimePartTests.cs" />
     <Compile Include="AllowedDayPartTests.cs" />
     <Compile Include="MainParserTest.cs" />

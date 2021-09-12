@@ -12,7 +12,7 @@ namespace Test
 	public class Schedule
 	{
 		static readonly AllowedDateTimePartCreator[] SchedulePartCreators = new AllowedDateTimePartCreator[PartConsts.NUM_PARTS] {
-			AllowedList=> AllowedDateTimePart.CreateDateTimePart(PartConsts.FIRST_MSEC, PartConsts.LAST_MSEC, AllowedList, PartConsts.MSECS),
+			AllowedList=> AllowedDateTimePartMapped.CreateDateTimePart(PartConsts.FIRST_MSEC, PartConsts.LAST_MSEC, AllowedList, PartConsts.MSECS,new int[]{10,10}),
 			AllowedList=> AllowedDateTimePart.CreateDateTimePart(PartConsts.FIRST_SEC, PartConsts.LAST_SEC, AllowedList, PartConsts.SECS),
 			AllowedList=> AllowedDateTimePart.CreateDateTimePart(PartConsts.FIRST_MIN, PartConsts.LAST_MIN, AllowedList, PartConsts.MINUTES),
 			AllowedList=> AllowedDateTimePart.CreateDateTimePart(PartConsts.FIRST_HOUR, PartConsts.LAST_HOUR, AllowedList, PartConsts.HOURS),
