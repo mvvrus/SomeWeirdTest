@@ -31,14 +31,14 @@ namespace Test
             return new AllowedDowPart(AllowedList);
         }
 
-        int NumFebs29InRange(int[] ValueParts, bool CountBack)
+        int NumFebs29InRange(int Year, int Month, bool CountBack)
         {
             int first_year, last_year; //Range of years to search for leap ones
 
             if (CountBack)
             {
-                first_year = ValueParts[PartConsts.YEARS];
-                if (ValueParts[PartConsts.MONTHS] > PartConsts.FEBRUARY_MONTH) first_year++;
+                first_year = Year;
+                if (Month > PartConsts.FEBRUARY_MONTH) first_year++;
                 last_year = _startYear;
                 if (_startMonth <= PartConsts.FEBRUARY_MONTH) last_year--;
             }
@@ -46,8 +46,8 @@ namespace Test
             {
                 first_year = _startYear;
                 if (_startMonth > PartConsts.FEBRUARY_MONTH) first_year++;
-                last_year = ValueParts[PartConsts.YEARS];
-                if (ValueParts[PartConsts.MONTHS] <= PartConsts.FEBRUARY_MONTH) last_year--;
+                last_year = Year;
+                if (Month <= PartConsts.FEBRUARY_MONTH) last_year--;
             }
             int result = 0;
             for(int year=first_year;year<=last_year;year++)
@@ -55,36 +55,34 @@ namespace Test
             return result;
         }
 
-        public override bool ValueIsAllowed(int[] ValueParts)
+        int DayOfWeek (int Year, int Month, int Day)
         {
-            //Has side effect! Computes and sets ValueParts[DOW] value.
-            bool count_back = _startYear > ValueParts[PartConsts.YEARS] ||
-                (_startYear == ValueParts[PartConsts.YEARS] && ((_startMonth > ValueParts[PartConsts.MONTHS])
-                || _startMonth == ValueParts[PartConsts.MONTHS] && _startDay > ValueParts[PartConsts.DAYS]));
-            int feb29_count = NumFebs29InRange (ValueParts, count_back);
+            bool count_back = _startYear > Year ||
+                (_startYear == Year && ((_startMonth > Month)
+                || _startMonth == Month && _startDay > Day));
+            int feb29_count = NumFebs29InRange(Year, Month, count_back);
 
-            int days_passed,month_days_passed;
-            int month_int_start=_startMonth, month_int_end=ValueParts[PartConsts.MONTHS];
-            if(count_back)
+            int days_passed, month_days_passed;
+            int month_int_start = _startMonth, month_int_end = Month;
+            if (count_back)
             {
-                month_int_start = ValueParts[PartConsts.MONTHS];
-                month_int_end = _startMonth; 
+                month_int_start = Month;
+                month_int_end = _startMonth;
             }
-            days_passed = (ValueParts[PartConsts.DAYS] - _startDay);
+            days_passed = (Day - _startDay);
             month_days_passed = DaysInMonthsPassedNonLeap(month_int_start, month_int_end);
             if (count_back) month_days_passed = -month_days_passed;
             days_passed += month_days_passed;
-            int full_years_passed = ValueParts[PartConsts.YEARS] - _startYear;
-            if (month_int_start > month_int_end) 
-                if (count_back) full_years_passed++; 
-                else  full_years_passed--;
-            days_passed += full_years_passed * PartConsts.DAYS_IN_NONLEAP_YEAR +(count_back?-feb29_count:feb29_count);
+            int full_years_passed = Year - _startYear;
+            if (month_int_start > month_int_end)
+                if (count_back) full_years_passed++;
+                else full_years_passed--;
+            days_passed += full_years_passed * PartConsts.DAYS_IN_NONLEAP_YEAR + (count_back ? -feb29_count : feb29_count);
             int dow = (_startDow + days_passed) % PartConsts.DAYS_IN_WEEK;
             if (dow < 0) dow = PartConsts.DAYS_IN_WEEK + dow;
-            ValueParts[PartNumber] = dow;
-            return base.ValueIsAllowed(dow, ValueParts);
-        }
+            return dow;
 
+        }
         private int DaysInMonthsPassedNonLeap(int MonthIntervalStart, int MonthIntervalEnd)
         {
             int result = 0;
@@ -92,6 +90,14 @@ namespace Test
             for (int i = 0; i<months_to_pass;i++) 
                 result+= PartConsts.DAYS_IN_MONTHS[(MonthIntervalStart+i- PartConsts.FIRST_MONTH) % PartConsts.MONTHS_IN_YEAR];
             return result;
+        }
+
+        public override bool ValueIsAllowed(int[] ValueParts)
+        {
+            //Has side effect! Computes and sets ValueParts[DOW] value.
+            int dow = DayOfWeek(Year: ValueParts[PartConsts.YEARS], Month: ValueParts[PartConsts.MONTHS], Day: ValueParts[PartConsts.DAYS]);
+            ValueParts[PartNumber] = dow;
+            return base.ValueIsAllowed(dow, ValueParts);
         }
 
         public override bool StepValue(bool ToNext, int[] ValueParts)
