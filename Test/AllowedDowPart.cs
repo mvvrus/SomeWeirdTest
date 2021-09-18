@@ -9,18 +9,12 @@ namespace Test
     class AllowedDowPart: AllowedDateTimePart
     {
 
-        readonly int _startDay, _startMonth, _startYear;
-        readonly int _startDow;
         AllowedDowPart(bool[] AllowedList): this(AllowedList, DateTime.Today)
         {
         }
 
-        internal AllowedDowPart(bool[] AllowedList, DateTime BaseDate) : base(PartConsts.FIRST_DOW, PartConsts.LAST_DOW, AllowedList, PartConsts.DOW)
+        internal AllowedDowPart(bool[] AllowedList, DateTime _1) : base(PartConsts.FIRST_DOW, PartConsts.LAST_DOW, AllowedList, PartConsts.DOW)
         {
-            _startDay = BaseDate.Day;
-            _startMonth = BaseDate.Month;
-            _startYear = BaseDate.Year;
-            _startDow = (int)BaseDate.DayOfWeek;
         }
 
 
