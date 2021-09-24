@@ -9,12 +9,18 @@ namespace Test
     class AllowedDateTimePartMapped: AllowedDateTimePart
     {
         //This implementation uses multi-level summary maps to speed up seacrhing for the next/previous valid value
-        //Each summary map element contains true if any of the lower-level map element contains true, false othervise
+        //Each summary map element contains summary of the block of the lower-level map elements - result of OR operation of values of the elments.
         //The lowest level map is a map of the ancestor class uses and have formal index of -1
-        //All other maps a stored in the _maps array (from lower to upper level)
+        //All other maps a stored in the Map array in the LevelInfo for the level(from lower to upper level)
         //A number of the lower-level map elements summarized at each level called the scale of the level 
         // are passed as an int[]  parameter of the constructor, the length of the array being the number of the additional maps used
-        bool[][] _maps; //Maps of summary for blocks of lower-level map values (one map for each level)
+        struct LevelInfo
+        {
+            internal bool[] Map; //Maps of summary for blocks of lower-level map values (one map for each level)
+            internal int MinAllowed; //Block containing FirstAllowedValue (all blocks before this surely doesn't contain any value)
+            internal int MaxAllowed; //Block containing LastAllowedValue (all blocks after this surely doesn't contain any value)
+        }
+        LevelInfo[] _levelInfos;
         int[] _scales; //Array of scales for each map level
         int _baseValue;//To remeber minimal value for this part
         int _baseMapLength; //To remeber size of the full map
@@ -24,20 +30,22 @@ namespace Test
             if (AllowedList != null)
             {
                 _scales = Scales;
-                _maps = new bool[_scales.Length][];
+                _levelInfos = new LevelInfo[_scales.Length];
                 _baseValue = MinAllowed;
                 _baseMapLength = MaxAllowed - MinAllowed + 1;
                 bool[] prev_map = AllowedList;
                 for (int i = 0; i < _scales.Length; i++)
                 {
-                    _maps[i] = new bool[(prev_map.Length + _scales[i] - 1) / _scales[i]];
-                    for (int j = 0; j < _maps[i].Length; j++)
+                    _levelInfos[i].Map = new bool[(prev_map.Length + _scales[i] - 1) / _scales[i]];
+                    for (int j = 0; j < _levelInfos[i].Map.Length; j++)
                     {
-                        _maps[i][j] = false;
-                        for (int k = 0; k < Math.Min(_scales[i], prev_map.Length - j * _scales[i]) && !_maps[i][j]; k++)
-                            if (prev_map[j * _scales[i] + k]) _maps[i][j] = true;
+                        _levelInfos[i].Map[j] = false;
+                        for (int k = 0; k < Math.Min(_scales[i], prev_map.Length - j * _scales[i]) && !_levelInfos[i].Map[j]; k++)
+                            if (prev_map[j * _scales[i] + k]) _levelInfos[i].Map[j] = true;
                     }
-                    prev_map = _maps[i];
+                    prev_map = _levelInfos[i].Map;
+                    _levelInfos[i].MinAllowed = (i==0? FirstAllowedValue-_baseValue:_levelInfos[i-1].MinAllowed) / _scales[i];
+                    _levelInfos[i].MaxAllowed = (i == 0 ? LastAllowedValue-_baseValue : _levelInfos[i - 1].MaxAllowed) / _scales[i];
                 }
             }
         }
@@ -67,19 +75,21 @@ namespace Test
                 if (map_no + 1 < _scales.Length) {
                     block_size = _scales[map_no + 1]; //Size of block of map to search
                     map_limit = (cur_value / block_size) * block_size + (ToNext ? block_size : -1); //Set appropriate (upper/lower) limit of search
-                    //Correct search limit to avoid reading beyond the map
-                    map_limit = Math.Min(map_limit, map_no<0? _baseMapLength : _maps[map_no].Length); 
+                    //Correct search limit to avoid useless processing beyond the range of allowed values
+                    map_limit = ToNext?
+                        Math.Min(map_limit, map_no<0? LastAllowedValue-_baseValue+1 : _levelInfos[map_no].MaxAllowed+1) 
+                        : Math.Max(map_limit,map_no < 0?FirstAllowedValue-_baseValue-1: _levelInfos[map_no].MinAllowed - 1); 
                 }
-                else map_limit = ToNext ? _maps[map_no].Length : -1;
+                else map_limit = ToNext ? _levelInfos[map_no].Map.Length : -1;
                 //Search for the next/prev valid value/block at this level
                 value_tocome = map_no < 0 ?
                     FindNextPrevValue(cur_value + _baseValue, map_limit + _baseValue) : //Search in the full map via ancestor class method
-                    FindNextPrevValue(cur_value, map_limit, _maps[map_no], 0); //Search in the block map
+                    FindNextPrevValue(cur_value, map_limit, _levelInfos[map_no].Map, 0); //Search in the block map
                 if (value_tocome.HasValue) break; //Valid value/block found in the required direction at this level. No need to search upper level map
                 //Prepare to search ove level upper (if it exists)
-                if(map_no+1 < _maps.Length) cur_value = cur_value / block_size; //Scale the cur_value if at least one serch to be performed
+                if(map_no+1 < _levelInfos.Length) cur_value = cur_value / block_size; //Scale the cur_value if at least one serch to be performed
                 map_no++; //Increment map number
-            } while (map_no<_maps.Length);
+            } while (map_no<_levelInfos.Length);
             //See if valid value/block with valid value found on some level 
             if(!value_tocome.HasValue)  {
                 //No more blocks with valid values found on the top level in the specified direction
@@ -96,11 +106,11 @@ namespace Test
                 cur_value = cur_value * _scales[map_no]+(ToNext?-1:_scales[map_no]); //Compute a start value to search on the lower level
                 map_no--; //Come one level lower to perform search on it
                 //Correct block limit to avoid possible reading beyond the map
-                map_limit = Math.Min(map_limit, map_no<0?_baseMapLength:_maps[map_no].Length); 
+                map_limit = Math.Min(map_limit, map_no<0?_baseMapLength:_levelInfos[map_no].Map.Length); 
                 //Search for the next/prev valid value/block at this level
                 value_tocome = map_no < 0 ? 
                     FindNextPrevValue(cur_value + _baseValue, map_limit + _baseValue) : //Search in the full map via ancestor class method
-                    FindNextPrevValue(cur_value, map_limit, _maps[map_no], 0); //Search in the block map
+                    FindNextPrevValue(cur_value, map_limit, _levelInfos[map_no].Map, 0); //Search in the block map
                 if (!value_tocome.HasValue) throw new Exception("No valid value found in the block marked as containing valid values");
                 cur_value = value_tocome.Value;
             }
