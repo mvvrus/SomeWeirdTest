@@ -109,13 +109,40 @@ namespace Test
 		// according to the memory allocation strategy.
 		// For now we use the simpliest strategy - heap allocation/garbage collection but the strategy may be changed for a purpose of optimization
 
-		int[] AcquirePartsArray() //Acquire memory for  storing parts of the DateTme under processing in operations with the scedule 
-		{
-			return new int[PartConsts.NUM_PARTS];
+
+		public abstract class PartsMemory
+        {
+			public abstract int[] PartsArray { get; }
+        }
+
+		public abstract class PartsMemMgr
+        {
+			public abstract PartsMemory Acquire();
+			public abstract void Release (PartsMemory Memory);
 		}
-		void ReleasePartsArray(int[] _1) //Release memory for stack(implemented as array) of parts that need to be adjusted
+
+		public class SimplePartsMemory : PartsMemory
 		{
-			//Do nothing
+			int[] _partsArray;
+			public SimplePartsMemory() { _partsArray = new int[PartConsts.NUM_PARTS]; }
+			public override int[] PartsArray { get { return _partsArray; } }
+		}
+
+        public class SimplePartsMemMgr : PartsMemMgr
+        {
+			public override PartsMemory Acquire() { return new SimplePartsMemory(); }
+			public override void Release(PartsMemory Memory) { }
+        }
+
+		SimplePartsMemMgr _memMgr = new SimplePartsMemMgr();
+
+        PartsMemory AcquirePartsArray() //Acquire memory for  storing parts of the DateTme under processing in operations with the scedule 
+		{
+			return _memMgr.Acquire();
+		}
+		void ReleasePartsArray(PartsMemory Memory) //Release memory for array of parts that need to be adjusted
+		{
+			_memMgr.Release(Memory);
 		}
 
 		internal Boolean CheckCurrentEvent(int[] ValueParts)
@@ -128,7 +155,7 @@ namespace Test
 			return true;
 		}
 
-		internal bool StepToNearestEvent(bool ToNext, ref int[] ValueParts)
+		internal bool StepToNearestEvent(bool ToNext, int[] ValueParts)
         {
 			bool step_made; //Flag to show successfull 
 			int part_number = PartConsts.NUM_PARTS - 1; //Part number of the date/time under processing (stepping/validating/wrapping)
@@ -183,16 +210,16 @@ namespace Test
 
 		public DateTime NearestEvent(DateTime t1)
 		{
-			int[] daytime_parts = AcquirePartsArray();
+			PartsMemory daytime_parts = AcquirePartsArray();
 			DateTime result;
             try
             {
-				SplitDateTimeToParts(t1, daytime_parts);
-				if (CheckCurrentEvent(daytime_parts)) result=t1;
+				SplitDateTimeToParts(t1, daytime_parts.PartsArray);
+				if (CheckCurrentEvent(daytime_parts.PartsArray)) result=t1;
 				else
                 {
-					if(!StepToNearestEvent(true, ref daytime_parts)) throw new NoMoreEventsException();
-					result = JoinDateTimeFromParts(daytime_parts);
+					if(!StepToNearestEvent(true, daytime_parts.PartsArray)) throw new NoMoreEventsException();
+					result = JoinDateTimeFromParts(daytime_parts.PartsArray);
                 }
 			}
 			finally
@@ -204,16 +231,16 @@ namespace Test
 
 		public DateTime NearestPrevEvent(DateTime t1)
 		{
-			int[] daytime_parts = AcquirePartsArray();
+			PartsMemory daytime_parts = AcquirePartsArray();
 			DateTime result;
 			try
 			{
-				SplitDateTimeToParts(t1, daytime_parts);
-				if (CheckCurrentEvent(daytime_parts)) result = t1;
+				SplitDateTimeToParts(t1, daytime_parts.PartsArray);
+				if (CheckCurrentEvent(daytime_parts.PartsArray)) result = t1;
 				else
 				{
-					if (!StepToNearestEvent(false, ref daytime_parts)) throw new NoMoreEventsException();
-					result = JoinDateTimeFromParts(daytime_parts);
+					if (!StepToNearestEvent(false, daytime_parts.PartsArray)) throw new NoMoreEventsException();
+					result = JoinDateTimeFromParts(daytime_parts.PartsArray);
 				}
 			}
 			finally
@@ -225,13 +252,13 @@ namespace Test
 
 		public DateTime NextEvent(DateTime t1)
 		{
-			int[] daytime_parts = AcquirePartsArray();
+			PartsMemory daytime_parts = AcquirePartsArray();
 			DateTime result;
 			try
 			{
-				SplitDateTimeToParts(t1, daytime_parts);
-				if (!StepToNearestEvent(true, ref daytime_parts)) throw new NoMoreEventsException();
-				result = JoinDateTimeFromParts(daytime_parts);
+				SplitDateTimeToParts(t1, daytime_parts.PartsArray);
+				if (!StepToNearestEvent(true, daytime_parts.PartsArray)) throw new NoMoreEventsException();
+				result = JoinDateTimeFromParts(daytime_parts.PartsArray);
 			}
 			finally
 			{
@@ -242,13 +269,13 @@ namespace Test
 
 		public DateTime PrevEvent(DateTime t1)
 		{
-			int[] daytime_parts = AcquirePartsArray();
+			PartsMemory daytime_parts = AcquirePartsArray();
 			DateTime result;
 			try
 			{
-				SplitDateTimeToParts(t1, daytime_parts);
-				if (!StepToNearestEvent(false, ref daytime_parts)) throw new NoMoreEventsException();
-				result = JoinDateTimeFromParts(daytime_parts);
+				SplitDateTimeToParts(t1, daytime_parts.PartsArray);
+				if (!StepToNearestEvent(false,daytime_parts.PartsArray)) throw new NoMoreEventsException();
+				result = JoinDateTimeFromParts(daytime_parts.PartsArray);
 			}
 			finally
 			{
