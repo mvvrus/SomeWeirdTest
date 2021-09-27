@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 
 
 namespace Test
@@ -110,31 +111,71 @@ namespace Test
 		// For now we use the simpliest strategy - heap allocation/garbage collection but the strategy may be changed for a purpose of optimization
 
 
-		public abstract class PartsMemory
+		protected abstract class PartsMemory
         {
 			public abstract int[] PartsArray { get; }
         }
 
-		public abstract class PartsMemMgr
+		protected abstract class PartsMemMgr
         {
 			public abstract PartsMemory Acquire();
 			public abstract void Release (PartsMemory Memory);
 		}
 
-		public class SimplePartsMemory : PartsMemory
+		class SimplePartsMemory : PartsMemory
 		{
 			int[] _partsArray;
 			public SimplePartsMemory() { _partsArray = new int[PartConsts.NUM_PARTS]; }
 			public override int[] PartsArray { get { return _partsArray; } }
 		}
 
-        public class SimplePartsMemMgr : PartsMemMgr
+        class SimplePartsMemMgr : PartsMemMgr
         {
 			public override PartsMemory Acquire() { return new SimplePartsMemory(); }
 			public override void Release(PartsMemory Memory) { }
         }
 
-		SimplePartsMemMgr _memMgr = new SimplePartsMemMgr();
+		class PoolPartsMemory : PartsMemory
+		{
+			int[] _partsArray;
+			internal PoolPartsMemory Next { get; set; }
+			PoolPartsMemory(bool _1) { }
+			public PoolPartsMemory() 
+			{ 
+				_partsArray= new int[PartConsts.NUM_PARTS];
+			}
+//			static public PoolPartsMemory Anchor { get; private set; } = new PoolPartsMemory();
+			public override int[] PartsArray { get { return _partsArray; } }
+		}
+		class PoolPartsMemMgr : PartsMemMgr
+        {
+			volatile PoolPartsMemory _top;//= PoolPartsMemory.Anchor;
+			public override PartsMemory Acquire() 
+			{
+				PoolPartsMemory result;
+				do
+				{
+					result = _top;
+					if (result != null)	{
+						PoolPartsMemory top_next = result.Next;
+						if (Interlocked.CompareExchange(ref _top, top_next, result) != result) result = null;
+						else result.Next = null;
+					}
+					else result = new PoolPartsMemory();
+				} while (result == null);
+				return result;
+			}
+			public override void Release(PartsMemory Memory) {
+				PoolPartsMemory oldtop,moment_top;
+				do {
+					oldtop = _top;
+					(Memory as PoolPartsMemory).Next = oldtop;
+					moment_top=Interlocked.CompareExchange(ref _top, (Memory as PoolPartsMemory), oldtop)  ;
+				} while(moment_top != oldtop);
+			}
+		}
+
+		PartsMemMgr _memMgr = new PoolPartsMemMgr();
 
         PartsMemory AcquirePartsArray() //Acquire memory for  storing parts of the DateTme under processing in operations with the scedule 
 		{
