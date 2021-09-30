@@ -156,7 +156,7 @@ namespace ScheduleLibrary.Test
             t2 = t.SubPart(start, start + len, work);
             Assert.AreEqual(STR.Substring(start,len), t2.ToString());
         }
-
+        /*
         [TestMethod]
         public void StrinPartArrayTest()
         {
@@ -263,6 +263,7 @@ namespace ScheduleLibrary.Test
             Assert.AreEqual("", t[1].ToString());
 
         }
+        */
 
     }
 }

@@ -20,28 +20,29 @@ namespace Test
 
     public abstract class TwoDelimParser: SecondLevelParser
     {
+        protected const int BASE_PARTS= 3;
         readonly char _delim;
-        readonly StringPartArray _spaceForParts;
+        readonly int _numParts;
+        //readonly StringPartArray _spaceForParts;
         readonly PartListParserSpecifier[] _partParsers;
-        protected TwoDelimParser(Char Delim, StringPartArray SpaceForParts, PartListParserSpecifier[] PartParsers)
+        protected TwoDelimParser(Char Delim, int NumParts, PartListParserSpecifier[] PartParsers)
         {
             _delim = Delim;
-            _spaceForParts = SpaceForParts;
+            _numParts = NumParts;
             _partParsers = PartParsers;
         }
 
-        protected virtual StringPartArray SplitForParts(StringPart Part, Char Delim, StringPartArray SpaceForParts)
+        protected virtual StringPartArray SplitForParts(StringPart Part, Char Delim, ref StringPartArray SpaceForParts)
         {
-            StringPartArray result = Part.Split(Delim, SpaceForParts);
-            if (result != null && result.Length != 3) result = null;
-            return result;
+            return Part.Split(Delim, SpaceForParts);
         }
 
         public override bool Parse(StringPart Part, ref bool[][] AllowedLists)
         {
-            StringPartArray parts = SplitForParts(Part, _delim, _spaceForParts);
+            StringPartArray space_for_parts = new StringPartArray(_numParts);
+            StringPartArray parts = SplitForParts(Part, _delim, ref space_for_parts);
             bool result = true;
-            if (parts != null)
+            if (parts.Length == _numParts && !parts.Overflow)
                 for (int i = 0; i < parts.Length && result; i++)
                 {
                     result = result && _partParsers[i].Parser.Parse(parts[i], ref AllowedLists[_partParsers[i].Index]);

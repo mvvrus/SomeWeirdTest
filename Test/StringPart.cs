@@ -58,7 +58,9 @@ namespace Test
                 nonchecked_yet_pos = _baseString.IndexOf(Delimiter, nonchecked_yet_pos, _end-nonchecked_yet_pos) + 1; 
                 no_place_for_result = !ResultSpace.Add(_baseString, old_pos, nonchecked_yet_pos == 0 ? _end: nonchecked_yet_pos-1); 
             } while (nonchecked_yet_pos>0 && !no_place_for_result);
-            return no_place_for_result ? null : ResultSpace;
+            return 
+                //no_place_for_result ? null : 
+                ResultSpace;
         }
 
         public int IndexOf(char Value, int StartPos=0)
@@ -92,37 +94,38 @@ namespace Test
 
     }
 
-    public class StringPartArray
+    public ref struct StringPartArray
     {
-        readonly StringPart[] _baseArray;
+        Span<StringPart> _baseArray;
         int _length;
-        readonly int _capacity;
         public int Length { get { return _length; } }
-        public int Capacity { get { return _capacity; } }
+        public int Capacity { get { return _baseArray.Length; } }
+        public bool Overflow { get; private set; }
         public StringPartArray(int Capacity)
         {
-            if (Capacity < 0) throw new InvalidOperationException("StringPartArray length cannot be negative");
+            if (Capacity <= 0) throw new InvalidOperationException("StringPartArray length must be positive");
             _length = 0;
-            _capacity = Capacity;
             _baseArray = new StringPart[Capacity];
-            for (int i = 0; i < _capacity; i++) _baseArray[i] = new StringPart(null);
+            Overflow = false;
+            for (int i = 0; i < Capacity; i++) _baseArray[i] = new StringPart(null);
         }
 
         public StringPart this[int Index] {
-            get { if (Index >= _length) throw new IndexOutOfRangeException(); return _baseArray[Index]; }
+            get { if (Index >= Length) throw new IndexOutOfRangeException(); return _baseArray[Index]; }
         }
         internal void SetLength(int NewLength)
         {
-            if (NewLength < 0 || NewLength > _capacity)
+            if (NewLength < 0 || NewLength > Capacity)
                 throw new InvalidOperationException("StringPartArray length cannot be negative or exceeds capacity");
             int to_clear = _length - NewLength;
             _length = NewLength;
             for (int i = 0; i < to_clear; i++) _baseArray[_length + i].Clear();
+            Overflow = false;
         }
 
         public bool Add(String BaseString, int Start, int End)
         {
-            if (_length >= _capacity) return false;
+            if (_length >= Capacity) return false;
             _baseArray[_length]._baseString = BaseString;
             _baseArray[_length]._start = Start;
             _baseArray[_length]._end = End;

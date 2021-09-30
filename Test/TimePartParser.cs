@@ -19,16 +19,15 @@ namespace Test
         };
         const string STR_ZERO = "0";
 
-        static readonly StringPartArray _timeParts = new StringPartArray(_partParsers.Length);
         private const char MSEC_DELIM='.';
 
-        public TimePartParser() : base(DELIM, _timeParts, _partParsers) { } 
-        protected override StringPartArray SplitForParts(StringPart Part, Char Delim, StringPartArray SpaceForParts)
+        public TimePartParser() : base(DELIM, _partParsers.Length, _partParsers) { } 
+        protected override StringPartArray SplitForParts(StringPart Part, Char Delim, ref StringPartArray SpaceForParts)
         {
-            StringPartArray result = base.SplitForParts(Part, Delim, SpaceForParts);
-            if(result!=null ) 
+            StringPartArray result = base.SplitForParts(Part, Delim, ref SpaceForParts);
+            if(!result.Overflow && result.Length==BASE_PARTS ) 
             {
-                int sec_pos = 2;
+                int sec_pos = BASE_PARTS-1;
                 int dot_pos = result[sec_pos].IndexOf(MSEC_DELIM);
                 if (dot_pos >= 0)
                 {

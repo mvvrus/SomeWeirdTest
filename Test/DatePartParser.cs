@@ -17,8 +17,7 @@ namespace Test
             new PartListParserSpecifier(PartConsts.YEARS, PartConsts.FIRST_YEAR, PartConsts.LAST_YEAR)
         };
 
-        static readonly StringPartArray _dateParts = new StringPartArray(_partParsers.Length);
-        public DatePartParser() : base(DELIM, _dateParts,_partParsers) { }
+        public DatePartParser() : base(DELIM, _partParsers.Length, _partParsers) { }
 
         public override bool Parse(StringPart Part, ref bool[][] AllowedLists)
         {
