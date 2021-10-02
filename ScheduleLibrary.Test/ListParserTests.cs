@@ -11,8 +11,8 @@ namespace ScheduleLibrary.Test
         [TestMethod]
         public void NumberParser_RecognizeTest()
         {
-            StringPartArray space = new StringPartArray(3);
-            StringPartArray t = "10,abc,".Split(',', space);
+            StringPartArray t = new StringPartArray(3);
+            "10,abc,".Split(',', ref t);
             Assert.IsTrue(NumberParser.NUMBER_PARSER.Recognize(t[0]));
             Assert.IsTrue(NumberParser.NUMBER_PARSER.Recognize(t[1]));
             Assert.IsFalse(NumberParser.NUMBER_PARSER.Recognize(t[2]));
@@ -21,8 +21,8 @@ namespace ScheduleLibrary.Test
         public void NumberParser_ParseIntTest()
         {
             int Value;
-            StringPartArray space = new StringPartArray(9);
-            StringPartArray t = "1,25,01,101, 1,1 ,,abc,1a".Split(',', space);
+            StringPartArray t = new StringPartArray(9);
+            "1,25,01,101, 1,1 ,,abc,1a".Split(',', ref t);
             Assert.IsTrue(NumberParser.NUMBER_PARSER.ParseInt(t[0], out Value, 0, 26));
             Assert.AreEqual(1, Value);
             Assert.IsTrue(NumberParser.NUMBER_PARSER.ParseInt(t[0], out Value, 1, 26));
@@ -45,8 +45,8 @@ namespace ScheduleLibrary.Test
         [TestMethod]
         public void NumberParser_ParseTest()
         {
-            StringPartArray space = new StringPartArray(10);
-            StringPartArray t = "0,1,5,26,27, 1,1 ,,abc,1a".Split(',', space);
+            StringPartArray t = new StringPartArray(10);
+            "0,1,5,26,27, 1,1 ,,abc,1a".Split(',', ref t);
             bool[] BoolMap = new bool[26];
             bool[] SavedBoolMap = BoolMap;
             Assert.IsFalse(NumberParser.NUMBER_PARSER.Parse(t[0], ref BoolMap, 1, 26));
@@ -85,8 +85,8 @@ namespace ScheduleLibrary.Test
         [TestMethod]
         public void AnyParser_RecognizeTest()
         {
-            StringPartArray space = new StringPartArray(4);
-            StringPartArray t = " *,,*,26".Split(',', space);
+            StringPartArray t = new StringPartArray(4);
+            " *,,*,26".Split(',', ref t);
             Assert.IsTrue(AnyParser.ANY_PARSER.Recognize(t[0]));
             Assert.IsFalse(AnyParser.ANY_PARSER.Recognize(t[1]));
             Assert.IsTrue(AnyParser.ANY_PARSER.Recognize(t[2]));
@@ -97,8 +97,8 @@ namespace ScheduleLibrary.Test
         [TestMethod]
         public void AnyParser_ParseRangeTest()
         {
-            StringPartArray space = new StringPartArray(4);
-            StringPartArray t = " *,,*,26".Split(',', space);
+            StringPartArray t = new StringPartArray(4);
+            " *,,*,26".Split(',', ref t);
             Assert.IsFalse(AnyParser.ANY_PARSER.ParseRange(t[0], out int RangeStart,out int RangeEnd,1,6));
             Assert.IsFalse(AnyParser.ANY_PARSER.ParseRange(t[1], out RangeStart, out RangeEnd, 1, 6));
             Assert.IsTrue(AnyParser.ANY_PARSER.ParseRange(t[2], out RangeStart, out RangeEnd, 1, 6));
@@ -110,8 +110,8 @@ namespace ScheduleLibrary.Test
         [TestMethod]
         public void AnyParser_ParseTest()
         {
-            StringPartArray space = new StringPartArray(4);
-            StringPartArray t = " *,,*,26".Split(',', space);
+            StringPartArray t = new StringPartArray(4);
+            " *,,*,26".Split(',', ref t);
             bool[] BoolMap = new bool[6];
             bool[] SaveMap = BoolMap;
             Assert.IsFalse(AnyParser.ANY_PARSER.Parse(t[0], ref BoolMap, 1, 6));
@@ -130,8 +130,8 @@ namespace ScheduleLibrary.Test
         [TestMethod]
         public void RangeParser_RecognizeTest()
         {
-            StringPartArray space = new StringPartArray(11);
-            StringPartArray t = "2-4,-6,20-,-,0-6,20-27,0-,-27,aaa-10,10-bbb,aaa".Split(',', space);
+            StringPartArray t = new StringPartArray(11);
+            "2-4,-6,20-,-,0-6,20-27,0-,-27,aaa-10,10-bbb,aaa".Split(',', ref t);
             Assert.IsTrue(RangeParser.RANGE_PARSER.Recognize(t[0]));
             Assert.IsTrue(RangeParser.RANGE_PARSER.Recognize(t[1]));
             Assert.IsTrue(RangeParser.RANGE_PARSER.Recognize(t[2]));
@@ -147,8 +147,8 @@ namespace ScheduleLibrary.Test
         [TestMethod]
         public void RangeParser_ParseRangeTest()
         {
-            StringPartArray space = new StringPartArray(11);
-            StringPartArray t = "2-4,-6,20-,-,0-6,20-27,0-,-27,aaa-10,10-bbb,aaa".Split(',', space);
+            StringPartArray t = new StringPartArray(11);
+            "2-4,-6,20-,-,0-6,20-27,0-,-27,aaa-10,10-bbb,aaa".Split(',', ref t);
             int RangeStart, RangeEnd;
             Assert.IsTrue(RangeParser.RANGE_PARSER.ParseRange(t[0], out RangeStart, out RangeEnd, 1, 26));
             Assert.AreEqual(2, RangeStart);
@@ -174,8 +174,8 @@ namespace ScheduleLibrary.Test
         [TestMethod]
         public void RangeParser_ParseTest()
         {
-            StringPartArray space = new StringPartArray(11);
-            StringPartArray t = "2-4,-6,20-,-,0-6,20-27,0-,-27,aaa-10,10-bbb,aaa".Split(',', space);
+            StringPartArray t = new StringPartArray(11);
+            "2-4,-6,20-,-,0-6,20-27,0-,-27,aaa-10,10-bbb,aaa".Split(',', ref t);
             bool[] BoolMap = new bool[26];
             bool[] SaveMap = BoolMap;
             Assert.IsTrue(RangeParser.RANGE_PARSER.Parse(t[0], ref BoolMap, 1, 26));
@@ -219,8 +219,8 @@ namespace ScheduleLibrary.Test
         [TestMethod]
         public void StepwiseParser_RecognizeTest()
         {
-            StringPartArray space = new StringPartArray(13);
-            StringPartArray t = "2-10/4,-6/4,7-/3,*/2,*/1a, */2,6-8/1,5-13/3,0-6/2,1-6/13,/10,bbb/3,aaa".Split(',', space);
+            StringPartArray t = new StringPartArray(13);
+            "2-10/4,-6/4,7-/3,*/2,*/1a, */2,6-8/1,5-13/3,0-6/2,1-6/13,/10,bbb/3,aaa".Split(',', ref t);
             Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[0])); //"2-10/4"
             Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[1])); //"-6/4"
             Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Recognize(t[2])); //"7-/3"
@@ -239,8 +239,8 @@ namespace ScheduleLibrary.Test
         [TestMethod]
         public void StepwiseParser_ParseTest()
         {
-            StringPartArray space = new StringPartArray(13);
-            StringPartArray t = "2-10/4,-6/4,7-/3,*/2,*/1a, */2,6-8/1,5-13/3,0-6/2,1-6/13,/10,bbb/3,aaa".Split(',', space);
+            StringPartArray t = new StringPartArray(13);
+            "2-10/4,-6/4,7-/3,*/2,*/1a, */2,6-8/1,5-13/3,0-6/2,1-6/13,/10,bbb/3,aaa".Split(',', ref t);
             bool[] BoolMap = new bool[12];
             bool[] SaveMap = BoolMap;
             Assert.IsTrue(StepwiseParser.STEPWISE_PARSER.Parse(t[0], ref BoolMap, 1, 12)); //"2-10/4"
@@ -292,10 +292,10 @@ namespace ScheduleLibrary.Test
             ListParser parser = new ListParser(1, 12);
             const String test_cases = "5;3,7;1-3,5-8/2,10;*/2,2,3;*;1,*,3,4-6,9-/2;*,*/2;;1,2,;0,1;2,*/1;3,* ,4;3,0-2;3,*,13";
             const char case_delim = ';';
-            StringPartArray space = new StringPartArray(test_cases.Count(c => c == case_delim)+1);
+            StringPartArray t = new StringPartArray(test_cases.Count(c => c == case_delim)+1);
             bool[] BoolMap = new bool[12];
             bool[] SaveMap = BoolMap;
-            StringPartArray t = test_cases.Split(case_delim, space);
+            test_cases.Split(case_delim, ref t);
             Assert.IsTrue(parser.Parse(t[0],ref BoolMap)); //"5"
             Assert.IsTrue(TestUtils.CheckBoolMap(new int[] { 5 }, BoolMap, 1, 12));
             BoolMap = SaveMap;

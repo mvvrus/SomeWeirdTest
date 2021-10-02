@@ -19,7 +19,7 @@ namespace Test
 
         public DatePartParser() : base(DELIM, _partParsers.Length, _partParsers) { }
 
-        public override bool Parse(StringPart Part, ref bool[][] AllowedLists)
+        public override bool Parse(in ReadOnlyMemory<char> Part, ref bool[][] AllowedLists)
         {
             if (!base.Parse(Part, ref AllowedLists)) return false;
             //Check if any valid combination of day/month (and maybe year) exists

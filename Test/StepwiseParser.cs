@@ -18,12 +18,11 @@ namespace Test
 
         static readonly public StepwiseParser STEPWISE_PARSER = new StepwiseParser();
 
-        public override bool Parse(StringPart Part, ref bool[] AllowedValues, int MinValue, int MaxValue)
+        public override bool Parse(in ReadOnlyMemory<char> Part, ref bool[] AllowedValues, int MinValue, int MaxValue)
         {
-            StringPartArray space = new StringPartArray(2);
-            StringPartArray parts = Part.Split(SLASH, space);
-            if (parts.Overflow || parts.Length != 2) return false;
-            StringPart numerator = parts[0];
+            StringPartArray parts = new StringPartArray(2);
+            if (!Part.Split(SLASH, ref parts) || parts.Length != 2) return false;
+            ReadOnlyMemory<char> numerator = parts[0];
             RangeParser numerator_parser = _numerator_parsers.FirstOrDefault(parser=>parser.Recognize(numerator));
             int denomerator; 
             if (numerator_parser == null || !NumberParser.NUMBER_PARSER.ParseInt(parts[1],out denomerator,2,MaxValue-MinValue) ) return false;
@@ -33,7 +32,7 @@ namespace Test
             return true;
         }
 
-        public override bool Recognize(StringPart Part)
+        public override bool Recognize(in ReadOnlyMemory<char> Part)
         {
             return Part.IndexOf(SLASH) >= 0;
         }

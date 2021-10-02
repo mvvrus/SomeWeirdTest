@@ -9,7 +9,7 @@ namespace Test
     class NumberParser : ListElementParser
     {
         static readonly public NumberParser NUMBER_PARSER = new NumberParser();
-        public override bool Parse(StringPart Part, ref bool[] AllowedValues, int MinValue, int MaxValue)
+        public override bool Parse(in ReadOnlyMemory<char> Part, ref bool[] AllowedValues, int MinValue, int MaxValue)
         {
             int value;
             if (ParseInt(Part, out value, MinValue, MaxValue))
@@ -20,22 +20,21 @@ namespace Test
             else return false;
         }
 
-        public override bool Recognize(StringPart Part)
+        public override bool Recognize(in ReadOnlyMemory<char> Part)
         {
             return Part.Length>0; //Try to parse any non-empty string
         }
 
-        public bool ParseInt(StringPart Part, out int Value, int MinValue, int MaxValue)
+        public bool ParseInt(in ReadOnlyMemory<char> Part, out int Value, int MinValue, int MaxValue)
         {
             Value = 0;
             if (Part.Length <= 0) return false;
             for (int i=0;i<Part.Length;i++) {
-                if (!Char.IsDigit(Part[i])) return false;
-                Value = Part[i] - '0'+Value*10;
+                if (!Char.IsDigit(Part.Span[i])) return false;
+                Value = Part.Span[i] - '0'+Value*10;
                 if (Value > MaxValue) return false;
             }
             return Value >= MinValue;
-
         }
     }
 }

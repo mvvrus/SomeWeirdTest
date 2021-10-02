@@ -19,7 +19,6 @@ namespace Test
             NumberParser.NUMBER_PARSER
         };
 
-        static readonly StringPart _work_part = new StringPart(null);
 
         public ListParser(int Start, int End)
         {
@@ -27,43 +26,31 @@ namespace Test
             _end = End;
         }
         
-        static StringPart AcquireWorkPart()
-        {
-            return _work_part;
-        }
-
-        static void ReleaseWorkPart(StringPart _1){}
-        public bool Parse(in StringPart Part, ref bool[] AllowedList)
+        public bool Parse(in ReadOnlyMemory<char> Part, ref bool[] AllowedList)
         {
             int list_delim_pos=-1;
-            StringPart work_part = AcquireWorkPart();
             int array_length = _end - _start + 1;
             AllowedList = new bool[array_length];
             bool[] saved_list = AllowedList;  //Permanent (for the method duration) anchor to avoid AllowedList be garbage collected
             bool[] element_list=AllowedList;  //Work reference
-            try {
-                do
-                {
-                    int old_pos = list_delim_pos + 1;
-                    list_delim_pos = Part.IndexOf(DELIM, old_pos);
-                    StringPart element_part = Part.SubPart(old_pos, (list_delim_pos < 0 ? Part.Length : list_delim_pos), work_part);
-                    ListElementParser element_parser = _listElementParsers.FirstOrDefault(curparser => curparser.Recognize(element_part));
-                    if (element_parser == null) return false;
-                    if (element_parser.Parse(element_part, ref element_list, _start, _end))
-                    {
-                        if (element_list == null )
-                        {
-                            element_list = saved_list;
-                            AllowedList = null;
-                            //but we do not break here because we want to validate the rest of this part of the schedule string
-                        }
-                    }
-                    else return false;
-                } while (list_delim_pos >= 0);
-            } finally
+            do
             {
-                ReleaseWorkPart(work_part);
-            }
+                int old_pos = list_delim_pos + 1;
+                list_delim_pos = Part.IndexOf(DELIM, old_pos);
+                ReadOnlyMemory<char> element_part = Part.Slice(old_pos, (list_delim_pos < 0 ? Part.Length - old_pos : list_delim_pos - old_pos));
+                ListElementParser element_parser = _listElementParsers.FirstOrDefault(curparser => curparser.Recognize(element_part));
+                if (element_parser == null) return false;
+                if (element_parser.Parse(element_part, ref element_list, _start, _end))
+                {
+                    if (element_list == null )
+                    {
+                        element_list = saved_list;
+                        AllowedList = null;
+                        //but we do not break here because we want to validate the rest of this part of the schedule string
+                    }
+                }
+                else return false;
+            } while (list_delim_pos >= 0);
             bool result = AllowedList==null;
             for (int i = 0; !result && i < array_length; i++)
                 result = result || AllowedList[i];

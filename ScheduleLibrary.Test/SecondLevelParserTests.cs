@@ -24,8 +24,8 @@ namespace ScheduleLibrary.Test
         public void DayOfWeekPartParser_RecognizeTest()
         {
             DayOfWeekPartParser parser = new DayOfWeekPartParser();
-            StringPartArray space = new StringPartArray(_dowTests.Count(c => c == _delim) + 1);
-            StringPartArray t = _dowTests.Split(_delim, space);
+            StringPartArray t = new StringPartArray(_dowTests.Count(c => c == _delim) + 1);
+            _dowTests.Split(_delim, ref t);
             Assert.IsTrue(parser.Recognize(t[0])); //"0"
             Assert.IsTrue(parser.Recognize(t[1])); //"3-6"
             Assert.IsTrue(parser.Recognize(t[2])); //"0,1,2"
@@ -41,8 +41,8 @@ namespace ScheduleLibrary.Test
         public void DayOfWeekPartParser_ParseTest()
         {
             DayOfWeekPartParser parser = new DayOfWeekPartParser();
-            StringPartArray space = new StringPartArray(_dowTests.Count(c => c == _delim) + 1);
-            StringPartArray t = _dowTests.Split(_delim, space);
+            StringPartArray t = new StringPartArray(_dowTests.Count(c => c == _delim) + 1);
+            _dowTests.Split(_delim, ref t);
             Clear();
             Assert.IsTrue(parser.Parse(t[0],ref AllowedLists)); //"0"
             Assert.IsTrue(TestUtils.CheckBoolMap(new int[] { 0 }, AllowedLists[PartConsts.DOW], PartConsts.FIRST_DOW, PartConsts.LAST_DOW));
@@ -82,8 +82,8 @@ namespace ScheduleLibrary.Test
         public void DatePartParser_RecognizeTest()
         {
             DatePartParser parser = new DatePartParser();
-            StringPartArray space = new StringPartArray(_dateTests.Count(c => c == _delim) + 1);
-            StringPartArray t = _dateTests.Split(_delim, space);
+            StringPartArray t = new StringPartArray(_dateTests.Count(c => c == _delim) + 1);
+            _dateTests.Split(_delim, ref t);
             Assert.IsTrue(parser.Recognize(t[0])); //"01.02.2021"
             Assert.IsTrue(parser.Recognize(t[1])); //"10-13.10-11.2020-2021"
             Assert.IsTrue(parser.Recognize(t[2])); //"1,12,21.8,11.2013,2020"
@@ -116,8 +116,8 @@ namespace ScheduleLibrary.Test
         public void DatePartParser_ParseTest()
         {
             DatePartParser parser = new DatePartParser();
-            StringPartArray space = new StringPartArray(_dateTests.Count(c => c == _delim) + 1);
-            StringPartArray t = _dateTests.Split(_delim, space);
+            StringPartArray t = new StringPartArray(_dateTests.Count(c => c == _delim) + 1);
+            _dateTests.Split(_delim, ref t);
             Clear();
             Assert.IsTrue(parser.Parse(t[0], ref AllowedLists)); //"01.02.2021"
             Assert.IsTrue(TestUtils.CheckMapAbsence(_dateParts, AllowedLists));
@@ -222,8 +222,8 @@ namespace ScheduleLibrary.Test
         public void TimePartParser_RecognizeTest()
         {
             TimePartParser parser = new TimePartParser();
-            StringPartArray space = new StringPartArray(_timeTests.Count(c => c == _delim) + 1);
-            StringPartArray t = _timeTests.Split(_delim, space);
+            StringPartArray t = new StringPartArray(_timeTests.Count(c => c == _delim) + 1);
+            _timeTests.Split(_delim, ref t);
             Assert.IsTrue(parser.Recognize(t[0])); //"17:20:03"
             Assert.IsTrue(parser.Recognize(t[1])); //"17:20:03.525"
             Assert.IsTrue(parser.Recognize(t[2])); //"0,23:0,59:0,59.0,999"
@@ -247,8 +247,8 @@ namespace ScheduleLibrary.Test
         public void TimePartParser_ParseTest()
         {
             TimePartParser parser = new TimePartParser();
-            StringPartArray space = new StringPartArray(_timeTests.Count(c => c == _delim) + 1);
-            StringPartArray t = _timeTests.Split(_delim, space);
+            StringPartArray t = new StringPartArray(_timeTests.Count(c => c == _delim) + 1);
+            _timeTests.Split(_delim, ref t);
             Clear();
             Assert.IsTrue(parser.Parse(t[0], ref AllowedLists)); //"17:20:03"
             Assert.IsTrue(TestUtils.CheckMapAbsence(_timeParts, AllowedLists));

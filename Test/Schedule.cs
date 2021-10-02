@@ -30,19 +30,12 @@ namespace Test
 
 		const int MAX_SCHEDULE_PARTS = 3;
 		static object _parseLock=new Object();
-//		static readonly StringPartArray _mainPartsSpace = new StringPartArray(MAX_SCHEDULE_PARTS);
-		static StringPartArray SplitInitialString (String scheduleString)
-        {
-			StringPartArray _mainPartsSpace = new StringPartArray(MAX_SCHEDULE_PARTS);
-			return scheduleString.Split(' ', _mainPartsSpace);
-        }
 		static internal void MainParser(String scheduleString, bool[][] AllowedLists)
         {
 			lock(_parseLock)
             {
-				StringPartArray _mainPartsSpace = new StringPartArray(MAX_SCHEDULE_PARTS);
-				StringPartArray scheduleParts = scheduleString.Split(' ', _mainPartsSpace);
-				bool parse_failed = scheduleParts.Overflow;
+				StringPartArray scheduleParts = new StringPartArray(MAX_SCHEDULE_PARTS);
+				bool parse_failed = !scheduleString.Split(' ', ref scheduleParts); ;
 				if (!parse_failed)
 				{
 					bool recognized = false;

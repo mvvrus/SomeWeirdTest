@@ -22,19 +22,19 @@ namespace Test
         private const char MSEC_DELIM='.';
 
         public TimePartParser() : base(DELIM, _partParsers.Length, _partParsers) { } 
-        protected override StringPartArray SplitForParts(StringPart Part, Char Delim, ref StringPartArray SpaceForParts)
+        protected override bool SplitForParts(in ReadOnlyMemory<char> Part, Char Delim, ref StringPartArray SpaceForParts)
         {
-            StringPartArray result = base.SplitForParts(Part, Delim, ref SpaceForParts);
-            if(!result.Overflow && result.Length==BASE_PARTS ) 
+            bool result = base.SplitForParts(Part, Delim, ref SpaceForParts);
+            if(result && SpaceForParts.Length==BASE_PARTS ) 
             {
                 int sec_pos = BASE_PARTS-1;
-                int dot_pos = result[sec_pos].IndexOf(MSEC_DELIM);
+                int dot_pos = SpaceForParts[sec_pos].IndexOf(MSEC_DELIM);
                 if (dot_pos >= 0)
                 {
-                    result.Add(result[sec_pos].BaseString, result[sec_pos].Start + dot_pos + 1, result[sec_pos].End);
-                    result[sec_pos].Truncate(dot_pos);
+                    SpaceForParts.Add(SpaceForParts[sec_pos].Slice(dot_pos + 1)) ;
+                    SpaceForParts[sec_pos]= SpaceForParts[sec_pos].Slice(0,dot_pos);
                 }
-                else result.Add(STR_ZERO, 0, STR_ZERO.Length);
+                else SpaceForParts.Add(STR_ZERO.AsMemory());
             }
             return result;
         }
