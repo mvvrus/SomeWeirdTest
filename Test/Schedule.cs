@@ -29,12 +29,15 @@ namespace Test
 		};
 
 		const int MAX_SCHEDULE_PARTS = 3;
+	    static ReadOnlyMemory<char>[] _schedulePartsBase = new ReadOnlyMemory<char>[MAX_SCHEDULE_PARTS];
 		static object _parseLock=new Object();
 		static internal void MainParser(String scheduleString, bool[][] AllowedLists)
         {
 			lock(_parseLock)
             {
-				StringPartArray scheduleParts = new StringPartArray(MAX_SCHEDULE_PARTS);
+				Span<ReadOnlyMemory<char>> schedule_parts_base = _schedulePartsBase.AsSpan();
+
+				StringPartArray scheduleParts = new StringPartArray(ref schedule_parts_base);
 				bool parse_failed = !scheduleString.Split(' ', ref scheduleParts); ;
 				if (!parse_failed)
 				{

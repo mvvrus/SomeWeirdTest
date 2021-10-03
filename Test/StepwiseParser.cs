@@ -18,9 +18,13 @@ namespace Test
 
         static readonly public StepwiseParser STEPWISE_PARSER = new StepwiseParser();
 
+        static ReadOnlyMemory<char>[] _ratioPartsBase = new ReadOnlyMemory<char>[2];
+
+
         public override bool Parse(in ReadOnlyMemory<char> Part, ref bool[] AllowedValues, int MinValue, int MaxValue)
         {
-            StringPartArray parts = new StringPartArray(2);
+            Span<ReadOnlyMemory<char>> ratio_parts_base = _ratioPartsBase.AsSpan();
+            StringPartArray parts = new StringPartArray(ref ratio_parts_base);
             if (!Part.Split(SLASH, ref parts) || parts.Length != 2) return false;
             ReadOnlyMemory<char> numerator = parts[0];
             RangeParser numerator_parser = _numerator_parsers.FirstOrDefault(parser=>parser.Recognize(numerator));

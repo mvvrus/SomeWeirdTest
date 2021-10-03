@@ -24,12 +24,14 @@ namespace Test
         readonly char _delim;
         readonly int _numParts;
         //readonly StringPartArray _spaceForParts;
+        ReadOnlyMemory<char>[] _partsBase;
         readonly PartListParserSpecifier[] _partParsers;
-        protected TwoDelimParser(Char Delim, int NumParts, PartListParserSpecifier[] PartParsers)
+        protected TwoDelimParser(Char Delim, ReadOnlyMemory<char>[] PartsBase, PartListParserSpecifier[] PartParsers)
         {
             _delim = Delim;
-            _numParts = NumParts;
+            _partsBase=PartsBase;
             _partParsers = PartParsers;
+            _numParts = _partsBase.Length;
         }
 
         protected virtual bool SplitForParts(in ReadOnlyMemory<char> Part, Char Delim, ref StringPartArray SpaceForParts)
@@ -39,7 +41,8 @@ namespace Test
 
         public override bool Parse(in ReadOnlyMemory<char> Part, ref bool[][] AllowedLists)
         {
-            StringPartArray parts = new StringPartArray(_numParts);
+            Span<ReadOnlyMemory<char>> parts_base = _partsBase.AsSpan();
+            StringPartArray parts = new StringPartArray(ref parts_base); 
             bool result = SplitForParts(Part, _delim, ref parts);
             if (result && parts.Length == _numParts)
                 for (int i = 0; i < parts.Length && result; i++)

@@ -20,7 +20,11 @@ namespace Test
             _baseArray = new ReadOnlyMemory<char>[Capacity];
             for (int i = 0; i < Capacity; i++) _baseArray[i] = ReadOnlyMemory<char>.Empty;
         }
-
+        public StringPartArray(ref Span<ReadOnlyMemory<char>> BaseArray)
+        {
+            _length = 0;
+            _baseArray = BaseArray;
+        }
         public ReadOnlyMemory<char> this[int Index] {
             get { if (Index >= Length) throw new IndexOutOfRangeException(); return _baseArray[Index]; }
             set { if (Index >= Length) throw new IndexOutOfRangeException(); _baseArray[Index]=value;}

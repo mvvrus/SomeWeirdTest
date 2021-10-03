@@ -17,11 +17,13 @@ namespace Test
             new PartListParserSpecifier(PartConsts.SECS, PartConsts.FIRST_SEC, PartConsts.LAST_SEC),
             new PartListParserSpecifier(PartConsts.MSECS, PartConsts.FIRST_MSEC, PartConsts.LAST_MSEC)
         };
+        static ReadOnlyMemory<char>[] _timePartsBase = new ReadOnlyMemory<char>[_partParsers.Length];
+
         const string STR_ZERO = "0";
 
         private const char MSEC_DELIM='.';
 
-        public TimePartParser() : base(DELIM, _partParsers.Length, _partParsers) { } 
+        public TimePartParser() : base(DELIM, _timePartsBase, _partParsers) { } 
         protected override bool SplitForParts(in ReadOnlyMemory<char> Part, Char Delim, ref StringPartArray SpaceForParts)
         {
             bool result = base.SplitForParts(Part, Delim, ref SpaceForParts);

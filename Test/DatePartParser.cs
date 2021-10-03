@@ -10,14 +10,16 @@ namespace Test
     class DatePartParser : TwoDelimParser
     {
         public const char DELIM = '.';
+
         static readonly PartListParserSpecifier[] _partParsers = new PartListParserSpecifier[]
         {
             new PartListParserSpecifier(PartConsts.DAYS, PartConsts.FIRST_DAY_IN_MONTH, PartConsts.LAST_DAY_IN_MONTH),
             new PartListParserSpecifier(PartConsts.MONTHS, PartConsts.FIRST_MONTH, PartConsts.LAST_MONTH),
             new PartListParserSpecifier(PartConsts.YEARS, PartConsts.FIRST_YEAR, PartConsts.LAST_YEAR)
         };
+        static ReadOnlyMemory<char>[] _datePartsBase = new ReadOnlyMemory<char>[_partParsers.Length];
 
-        public DatePartParser() : base(DELIM, _partParsers.Length, _partParsers) { }
+        public DatePartParser() : base(DELIM, _datePartsBase, _partParsers) { }
 
         public override bool Parse(in ReadOnlyMemory<char> Part, ref bool[][] AllowedLists)
         {
