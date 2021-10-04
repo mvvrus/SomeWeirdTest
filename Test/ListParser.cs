@@ -33,6 +33,16 @@ namespace Test
         }
 
         static void ReleaseWorkPart(StringPart _1){}
+        public bool Recognize(in StringPart Part)
+        {
+            if (Part != null)
+            {
+                if (Part.IndexOf(DELIM) >= 0) return true;
+                foreach(var t in _listElementParsers)
+                    if (t.Recognize(Part)) return true;
+            }
+            return false;
+        }
         public bool Parse(in StringPart Part, ref bool[] AllowedList)
         {
             int list_delim_pos=-1;

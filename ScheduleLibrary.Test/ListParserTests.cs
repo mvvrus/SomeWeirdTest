@@ -11,11 +11,12 @@ namespace ScheduleLibrary.Test
         [TestMethod]
         public void NumberParser_RecognizeTest()
         {
-            StringPartArray space = new StringPartArray(3);
-            StringPartArray t = "10,abc,".Split(',', space);
+            StringPartArray space = new StringPartArray(4);
+            StringPartArray t = "10,abc,,1a".Split(',', space);
             Assert.IsTrue(NumberParser.NUMBER_PARSER.Recognize(t[0]));
-            Assert.IsTrue(NumberParser.NUMBER_PARSER.Recognize(t[1]));
+            Assert.IsFalse(NumberParser.NUMBER_PARSER.Recognize(t[1]));
             Assert.IsFalse(NumberParser.NUMBER_PARSER.Recognize(t[2]));
+            Assert.IsFalse(NumberParser.NUMBER_PARSER.Recognize(t[3]));
         }
         [TestMethod]
         public void NumberParser_ParseIntTest()
@@ -286,6 +287,30 @@ namespace ScheduleLibrary.Test
             Assert.IsFalse(StepwiseParser.STEPWISE_PARSER.Parse(t[12], ref BoolMap, 1, 12)); //"aaa"
         }
 
+        [TestMethod]
+        public void ListParser_RecognizeTest()
+        {
+            ListParser parser = new ListParser(1, 12);
+            const String test_cases = "5;3,7;1-3,5-8/2,10;*/2,2,3;*;1,*,3,4-6,9-/2;*,*/2;;1,2,;1-7/3;2,*/1;3,* ,4;4-8;abc";
+            const char case_delim = ';';
+            StringPartArray space = new StringPartArray(test_cases.Count(c => c == case_delim) + 1);
+            StringPartArray t = test_cases.Split(case_delim, space);
+            Assert.IsTrue(parser.Recognize(t[0])); //"5"
+            Assert.IsTrue(parser.Recognize(t[1])); //"3,7"
+            Assert.IsTrue(parser.Recognize(t[2])); //"1-3,5-8/2,10"
+            Assert.IsTrue(parser.Recognize(t[3]));//"*/2,2,3"
+            Assert.IsTrue(parser.Recognize(t[4]));//"*"
+            Assert.IsTrue(parser.Recognize(t[5]));//"1,*,3,4-6,9-/2"
+            Assert.IsTrue(parser.Recognize(t[6]));//"*,*/2"
+            Assert.IsFalse(parser.Recognize(t[7])); //""
+            Assert.IsTrue(parser.Recognize(t[8])); //"1,2,"
+            Assert.IsTrue(parser.Recognize(t[9])); //"1-7/3"
+            Assert.IsTrue(parser.Recognize(t[10])); //"2,*/1"
+            Assert.IsTrue(parser.Recognize(t[11])); //"3,* ,4"
+            Assert.IsTrue(parser.Recognize(t[12])); //"4-8"
+            Assert.IsFalse(parser.Recognize(t[13])); //"abc"
+
+        }
         [TestMethod]
         public void ListParser_ParseTest()
         {
