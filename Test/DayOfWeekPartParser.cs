@@ -18,7 +18,7 @@ namespace Test
 
         public override bool Recognize(in ReadOnlyMemory<char> Part)
         {
-            return Part.IndexOf(DatePartParser.DELIM)<0 && Part.IndexOf(TimePartParser.DELIM)<0;
+            return _parser.Recognize(Part);
         }
     }
 }

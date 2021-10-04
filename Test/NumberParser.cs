@@ -22,7 +22,13 @@ namespace Test
 
         public override bool Recognize(in ReadOnlyMemory<char> Part)
         {
-            return Part.Length>0; //Try to parse any non-empty string
+            if (Part.Length > 0)
+                for (int i = 0; i < Part.Length; i++)
+                {
+                    if (!Char.IsDigit(Part.Span[i])) return false;
+                }
+            else return false;
+            return true;
         }
 
         public bool ParseInt(in ReadOnlyMemory<char> Part, out int Value, int MinValue, int MaxValue)

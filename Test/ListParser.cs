@@ -25,7 +25,14 @@ namespace Test
             _start = Start;
             _end = End;
         }
-        
+
+        public bool Recognize(in ReadOnlyMemory<char> Part)
+        {
+            if (Part.IndexOf(DELIM) >= 0) return true;
+            foreach(var t in _listElementParsers)
+                if (t.Recognize(Part)) return true;
+            return false;
+        }
         public bool Parse(in ReadOnlyMemory<char> Part, ref bool[] AllowedList)
         {
             int list_delim_pos=-1;
