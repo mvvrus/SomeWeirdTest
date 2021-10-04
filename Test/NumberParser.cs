@@ -22,7 +22,13 @@ namespace Test
 
         public override bool Recognize(StringPart Part)
         {
-            return Part.Length>0; //Try to parse any non-empty string
+            if (Part.Length > 0)
+                for (int i = 0; i < Part.Length; i++)
+                {
+                    if (!Char.IsDigit(Part[i])) return false;
+                }
+            else return false;
+            return true;
         }
 
         public bool ParseInt(StringPart Part, out int Value, int MinValue, int MaxValue)

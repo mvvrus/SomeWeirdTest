@@ -32,7 +32,7 @@ namespace ScheduleLibrary.Test
             Assert.IsTrue(parser.Recognize(t[3])); //"7"
             Assert.IsFalse(parser.Recognize(t[4])); //"11.02.21"
             Assert.IsFalse(parser.Recognize(t[5])); //"17:35:20"
-            Assert.IsTrue(parser.Recognize(t[6])); //""
+            Assert.IsFalse(parser.Recognize(t[6])); //""
             Assert.IsTrue(parser.Recognize(t[7])); //"*"
             Assert.IsTrue(parser.Recognize(t[8])); //"*/4"
         }
