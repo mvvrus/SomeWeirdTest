@@ -43,12 +43,12 @@ namespace Test
             {
                 StringPart limit_part = Part.SubPart(0, dash_pos, work_part);
                 if (result)
-                    if (limit_part.Length == 0) RangeStart = MinValue;
+                    if (limit_part.Length == 0) return false;
                     else
                         if (!NumberParser.NUMBER_PARSER.ParseInt(limit_part, out RangeStart, MinValue, MaxValue)) result = false;
                 limit_part = Part.SubPart(dash_pos+1, Part.Length, work_part);
                 if (result)
-                    if (limit_part.Length == 0) RangeEnd = MaxValue;
+                    if (limit_part.Length == 0) return false;
                     else
                         if (!NumberParser.NUMBER_PARSER.ParseInt(limit_part, out RangeEnd, MinValue, MaxValue)) result = false;
 
