@@ -38,23 +38,17 @@ namespace Test
             int list_delim_pos=-1;
             int array_length = _end - _start + 1;
             AllowedList = new bool[array_length];
-            bool[] saved_list = AllowedList;  //Permanent (for the method duration) anchor to avoid AllowedList be garbage collected
-            bool[] element_list=AllowedList;  //Work reference
             do
             {
+                if (null == AllowedList) return false;
                 int old_pos = list_delim_pos + 1;
                 list_delim_pos = Part.IndexOf(DELIM, old_pos);
                 ReadOnlyMemory<char> element_part = Part.Slice(old_pos, (list_delim_pos < 0 ? Part.Length - old_pos : list_delim_pos - old_pos));
                 ListElementParser element_parser = _listElementParsers.FirstOrDefault(curparser => curparser.Recognize(element_part));
                 if (element_parser == null) return false;
-                if (element_parser.Parse(element_part, ref element_list, _start, _end))
+                if (element_parser.Parse(element_part, ref AllowedList, _start, _end))
                 {
-                    if (element_list == null )
-                    {
-                        element_list = saved_list;
-                        AllowedList = null;
-                        //but we do not break here because we want to validate the rest of this part of the schedule string
-                    }
+                    if (AllowedList == null && old_pos > 0) return false;
                 }
                 else return false;
             } while (list_delim_pos >= 0);

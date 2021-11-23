@@ -33,12 +33,12 @@ namespace Test
             if (dash_pos < 0) return false;
             ReadOnlyMemory<char> limit_part = Part.Slice(0, dash_pos);
             if (result)
-                if (limit_part.Length == 0) RangeStart = MinValue;
+                if (limit_part.Length == 0) result = false;
                 else
                     if (!NumberParser.NUMBER_PARSER.ParseInt(limit_part, out RangeStart, MinValue, MaxValue)) result = false;
             limit_part = Part.Slice(dash_pos+1);
             if (result)
-                if (limit_part.Length == 0) RangeEnd = MaxValue;
+                if (limit_part.Length == 0) result = false;
                 else
                     if (!NumberParser.NUMBER_PARSER.ParseInt(limit_part, out RangeEnd, MinValue, MaxValue)) result = false;
 
